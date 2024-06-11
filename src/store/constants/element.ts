@@ -1,0 +1,2 @@
+export const INIT_ELEMENT = "INIT_ELEMENT";
+export const UPDATE_ELEMENT_BY_IDX = "UPDATE_ELEMENT_BY_IDX";
