@@ -1,4 +1,8 @@
-import { INIT_ELEMENT, UPDATE_ELEMENT_BY_IDX } from "@/store/constants/element";
+import {
+  ADD_ELEMENT,
+  INIT_ELEMENT,
+  UPDATE_ELEMENT_BY_IDX,
+} from "@/store/constants/element";
 import { Element } from "@/types/element";
 import { Action } from "@/types/reduxType";
 
@@ -13,6 +17,8 @@ const elementReducer = (state = initialValue, action: Action<Element>) => {
     const { idx, data } = payload;
     state[idx] = data;
     return [...state];
+  } else if (type === ADD_ELEMENT) {
+    return [...state, payload];
   } else {
     return state;
   }

@@ -1,8 +1,10 @@
+import { InputNumberProps } from "antd";
+
 export interface Props {
   name: string;
   idx: number;
-  props: {
-    min: number;
-    max: number;
-  };
+  code: number;
+  type: "inputNumber";
+  defaultValue: number;
+  property: InputNumberProps;
 }

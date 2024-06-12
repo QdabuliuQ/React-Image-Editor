@@ -1,4 +1,9 @@
-import { INIT_ELEMENT, UPDATE_ELEMENT_BY_IDX } from "@/store/constants/element";
+import {
+  ADD_ELEMENT,
+  DELETE_ELEMENT_BY_IDX,
+  INIT_ELEMENT,
+  UPDATE_ELEMENT_BY_IDX,
+} from "@/store/constants/element";
 import { Element } from "@/types/element";
 
 // 初始化元素
@@ -13,6 +18,22 @@ export function initElement(payload: Array<Element>) {
 export function updateElementByIdx(payload: { idx: number; data: Element }) {
   return {
     type: UPDATE_ELEMENT_BY_IDX,
+    payload,
+  };
+}
+
+// 添加元素
+export function addElement(payload: any) {
+  return {
+    type: ADD_ELEMENT,
+    payload,
+  };
+}
+
+// 删除元素
+export function deleteElementByIdx(payload: number) {
+  return {
+    type: DELETE_ELEMENT_BY_IDX,
     payload,
   };
 }

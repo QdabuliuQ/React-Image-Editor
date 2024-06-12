@@ -6,7 +6,7 @@ import Panel from "./components/panel";
 
 import "./index.less";
 
-function Edit() {
+export default memo(function Edit() {
   return (
     <div className="edit-page">
       <Menu />
@@ -14,6 +14,4 @@ function Edit() {
       <Panel />
     </div>
   );
-}
-
-export default memo(Edit);
+});

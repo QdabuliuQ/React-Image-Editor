@@ -1,17 +1,18 @@
 import { memo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { InputNumber } from "antd";
+import { Select } from "antd";
 
-import events from "@/bus";
 import { updateElementByIdx } from "@/store/actions/element";
 import debounce from "@/utils/debounce";
 
 import { Props } from "./type";
 
-export default memo(function _InputNumber(props: Props) {
+export default memo(function _Select(props: Props) {
+  const element = useSelector((state: any) => state.element)[props.idx];
   const dispatch = useDispatch();
+
   const onChange = useCallback(
-    debounce((e: number) => {
+    debounce((e: string) => {
       element[props.name] = e;
       dispatch(
         updateElementByIdx({
@@ -19,22 +20,16 @@ export default memo(function _InputNumber(props: Props) {
           data: JSON.parse(JSON.stringify(element)),
         })
       );
-      console.log(elements);
-
-      events.emit("renderElement", {
-        [props.name]: e,
-      });
     }),
     []
   );
-  const elements = useSelector((state: any) => state.element);
-  const element = elements[props.idx];
 
   return (
-    <InputNumber
-      {...props.property}
+    <Select
       defaultValue={props.defaultValue}
+      style={{ width: "100%" }}
       onChange={onChange}
+      {...props.property}
     />
   );
 });

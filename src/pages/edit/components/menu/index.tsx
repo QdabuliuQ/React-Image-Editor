@@ -1,4 +1,6 @@
-import { memo, useMemo } from "react";
+import { memo, useCallback, useMemo } from "react";
+
+import events from "@/bus";
 
 import { MenuItem } from "./type";
 
@@ -8,12 +10,12 @@ function Menu() {
   const menus = useMemo(
     () => [
       {
-        type: "text",
+        type: "Text",
         icon: "i_text",
         title: "文本",
       },
       {
-        type: "shape",
+        type: "Shape",
         icon: "i_shape",
         title: "形状",
       },
@@ -21,11 +23,19 @@ function Menu() {
     []
   );
 
+  const clickHandle = useCallback((type: string) => {
+    events.emit("createElement", type);
+  }, []);
+
   return (
     <div className="menu-component">
       <div className="menu-container">
         {menus.map((item: MenuItem) => (
-          <div key={item.icon} className="menu-item">
+          <div
+            onClick={() => clickHandle(item.type)}
+            key={item.icon}
+            className="menu-item"
+          >
             <i className={`iconfont ${item.icon}`}></i>
             <span>{item.title}</span>
           </div>
