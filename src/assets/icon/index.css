@@ -1,10 +1,10 @@
 @font-face {
   font-family: "iconfont"; /* Project id 4581064 */
-  src: url("//at.alicdn.com/t/c/font_4581064_i2luc314k98.woff2?t=1718091077063")
+  src: url("//at.alicdn.com/t/c/font_4581064_tsey3nfr2wd.woff2?t=1718263363420")
       format("woff2"),
-    url("//at.alicdn.com/t/c/font_4581064_i2luc314k98.woff?t=1718091077063")
+    url("//at.alicdn.com/t/c/font_4581064_tsey3nfr2wd.woff?t=1718263363420")
       format("woff"),
-    url("//at.alicdn.com/t/c/font_4581064_i2luc314k98.ttf?t=1718091077063")
+    url("//at.alicdn.com/t/c/font_4581064_tsey3nfr2wd.ttf?t=1718263363420")
       format("truetype");
 }
 
@@ -14,6 +14,38 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.i_other:before {
+  content: "\e60b";
+}
+
+.i_triangle:before {
+  content: "\e6af";
+}
+
+.i_circle:before {
+  content: "\eb99";
+}
+
+.i_top:before {
+  content: "\e648";
+}
+
+.i_down:before {
+  content: "\e64a";
+}
+
+.i_to_top:before {
+  content: "\e68d";
+}
+
+.i_to_down:before {
+  content: "\e626";
+}
+
+.i_rect:before {
+  content: "\e620";
 }
 
 .i_text:before {

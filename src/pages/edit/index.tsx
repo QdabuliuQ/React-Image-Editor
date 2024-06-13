@@ -4,11 +4,11 @@ import Canvas from "./components/canvas";
 import Menu from "./components/menu";
 import Panel from "./components/panel";
 
-import "./index.less";
+import style from "./index.module.less";
 
 export default memo(function Edit() {
   return (
-    <div className="edit-page">
+    <div className={style["edit-page"]}>
       <Menu />
       <Canvas />
       <Panel />

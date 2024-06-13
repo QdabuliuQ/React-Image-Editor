@@ -8,6 +8,7 @@ import store from "@/store";
 import App from "./App.tsx";
 
 import "./index.less";
+import "@/assets/style/common.less";
 import "@/assets/icon/index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

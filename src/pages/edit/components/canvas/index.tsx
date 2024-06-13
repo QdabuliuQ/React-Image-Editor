@@ -1,16 +1,14 @@
-import { memo, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { memo, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { fabric } from "fabric";
 
 import events from "@/bus";
 import initAligningGuidelines from "@/libs/guidelines";
 import { updateActive } from "@/store/actions/active";
-import {
-  addElement,
-  deleteElementByIdx,
-  updateElementByIdx,
-} from "@/store/actions/element";
+import { addElement } from "@/store/actions/element";
+import { Shape } from "@/types/shape";
 import * as createMethods from "@/utils/element";
+import { createShapeElement } from "@/utils/element";
 
 import "./index.less";
 
@@ -18,82 +16,66 @@ const elementMap = new Map();
 let canvas: any;
 function Canvas() {
   const dispatch = useDispatch();
-  const elements = useSelector((state: any) => state.element);
-  const active = useSelector((state: any) => state.active);
-  const [customActive, setCustomActive] = useState("");
 
+  // 删除元素
   const deleteElementEvent = (id: string) => {
-    for (let i = 0; i < elements.length; i++) {
-      if (elements[i]._data.id === id) {
-        dispatch(deleteElementByIdx(i));
-        break;
-      }
-    }
+    canvas.remove(elementMap.get(id));
+    elementMap.delete(id);
   };
 
-  useEffect(() => {
-    setCustomActive(active);
-    if (canvas) {
-      setTimeout(() => {
-        console.log(canvas);
+  interface Options {
+    svg: string;
+    shape: Shape;
+  }
 
-        // canvas.loadFromJSON(
-        //   JSON.stringify({
-        //     background: "#e5e5e5",
-        //     objects: elements,
-        //   }),
-        //   canvas.renderAll.bind(canvas)
-        // );
-      }, 1000);
+  // 创建元素
+  function createElementEvent<T extends string>(
+    type: T,
+    options?: T extends "svg" ? Options : never
+  ) {
+    if (type === "svg") {
+      createShapeElement(options as Options, (element: any) => {
+        elementMap.set(element._data.id, element);
+        dispatch(addElement(element.toObject()));
+        canvas.add(element);
+        canvas.setActiveObject(element);
+      });
+    } else {
+      const element = (createMethods as any)[`create${type}Element`]();
+      elementMap.set(element._data.id, element);
+      dispatch(addElement(element.toObject()));
+      canvas.add(element);
+      canvas.setActiveObject(element);
     }
+  }
 
-    // if (canvas && elements) {
-    //   canvas.loadFromJSON(elements);
-    // }
-  }, [elements, active]);
-
-  const createElementEvent = (type: string) => {
-    const element = (createMethods as any)[`create${type}Element`]();
-    elementMap.set(element._data.id, element);
-    dispatch(addElement(element.toObject()));
-    canvas.add(element);
-    canvas.setActiveObject(element);
-  };
-
+  // 激活元素
   const setActiveElementEvent = (id: string) => {
     dispatch(updateActive(id));
   };
 
-  const renderElementEvent = (elements: Array<Element>) => {
-    canvas.loadFromJSON(
-      JSON.stringify({
-        background: "#e5e5e5",
-        objects: elements,
-      })
-    );
+  // 渲染元素
+  const renderElementEvent = (data: {
+    key: string;
+    value: string | number | boolean;
+    active: string;
+  }) => {
+    if (elementMap.has(data.active)) {
+      elementMap.get(data.active).set({
+        [data.key]: data.value,
+      });
+      canvas.renderAll();
+    }
   };
 
-  const modifiedElementEvent = (config: any) => {
-    console.log(customActive);
-
-    if (customActive) {
-      for (let i = 0; i < elements.length; i++) {
-        if (elements[i]._data.id === customActive) {
-          dispatch(
-            updateElementByIdx({
-              idx: i,
-              data: config,
-            })
-          );
-          break;
-        }
-      }
+  // 元素层级状态改变
+  const updateElementLayoutEvent = (data: { type: string; active: string }) => {
+    if (elementMap.has(data.active)) {
+      canvas[data.type](elementMap.get(data.active));
     }
   };
 
   useEffect(() => {
-    console.log(elements);
-
     canvas = new fabric.Canvas("c", {
       backgroundColor: "#e5e5e5",
       selection: false, // 画布不显示选中
@@ -111,16 +93,17 @@ function Canvas() {
     events.addListener("deleteElement", deleteElementEvent);
     events.addListener("setActiveElement", setActiveElementEvent);
     events.addListener("renderElement", renderElementEvent);
-    events.addListener("modifiedElement", modifiedElementEvent);
+    events.addListener("updateElementLayout", updateElementLayoutEvent);
 
     return () => {
       events.removeAllListeners("createElement");
       events.removeAllListeners("deleteElement");
       events.removeAllListeners("setActiveElement");
       events.removeAllListeners("renderElement");
-      events.removeAllListeners("modifiedElement");
+      events.removeAllListeners("updateElementLayout");
 
       canvas.dispose();
+      canvas = null;
     };
 
     // const rect = new fabric.Rect({

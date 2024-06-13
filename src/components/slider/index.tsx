@@ -1,6 +1,6 @@
 import { memo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Switch } from "antd";
+import { Slider } from "antd";
 
 import events from "@/bus";
 import { updateElementByIdx } from "@/store/actions/element";
@@ -8,9 +8,12 @@ import debounce from "@/utils/debounce";
 
 import { Props } from "./type";
 
-export default memo(function _Switch(props: Props) {
+export default memo(function _Slider(props: Props) {
+  const element = useSelector((state: any) => state.element)[props.idx];
+  const dispatch = useDispatch();
+
   const onChange = useCallback(
-    debounce((e: boolean) => {
+    debounce((e: number) => {
       element[props.name] = e;
       dispatch(
         updateElementByIdx({
@@ -28,13 +31,14 @@ export default memo(function _Switch(props: Props) {
     []
   );
 
-  const element = useSelector((state: any) => state.element)[props.idx];
-  const dispatch = useDispatch();
   return (
-    <Switch
-      defaultChecked={props.defaultValue}
+    <Slider
+      style={{
+        width: "100%",
+      }}
       {...props.property}
       onChange={onChange}
+      defaultValue={props.defaultValue}
     />
   );
 });

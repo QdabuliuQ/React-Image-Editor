@@ -1,6 +1,7 @@
 import { fabric } from "fabric";
 
 import events from "@/bus";
+import { Shape } from "@/types/shape";
 
 import getRandomID from "./randomID";
 
@@ -10,7 +11,7 @@ const deleteIcon =
 const img = document.createElement("img");
 img.src = deleteIcon;
 
-function deleteObject(eventData: any, transform: any) {
+function deleteObject(_: any, transform: any) {
   const target = transform.target;
   const canvas = target.canvas;
   canvas.remove(target);
@@ -56,6 +57,34 @@ function _toObject(toObject: any) {
   })(toObject);
 }
 
+// 元素绑定事件
+function initElementProperty(element: any) {
+  element.controls.deleteControl = new fabric.Control({
+    x: 0,
+    y: 0.7,
+    offsetY: 16,
+    cursorStyle: "pointer",
+    mouseUpHandler: deleteObject,
+    render: renderIcon,
+    cornerSize: 18,
+  });
+  element.toObject = _toObject(element.toObject);
+
+  element.on("selected", function (options: any) {
+    events.emit("setActiveElement", options.target._data.id);
+  });
+
+  // 监听元素取消选中事件
+  element.on("deselected", function () {
+    events.emit("setActiveElement", "");
+  });
+
+  element.on("modified", function (options: any) {
+    events.emit("modifiedElement", options.target.toObject());
+  });
+}
+
+// 创建文本
 export function createTextElement() {
   const text = new fabric.Textbox("Lorum ipsum dolor sit amet", {
     left: 50,
@@ -77,29 +106,101 @@ export function createTextElement() {
     },
   });
 
-  text.controls.deleteControl = new fabric.Control({
-    x: 0,
-    y: 0.7,
-    offsetY: 16,
-    cursorStyle: "pointer",
-    mouseUpHandler: deleteObject,
-    render: renderIcon,
-    cornerSize: 18,
-  });
-  text.toObject = _toObject(text.toObject);
-
-  text.on("selected", function (options: any) {
-    events.emit("setActiveElement", options.target._data.id);
-  });
-
-  // 监听元素取消选中事件
-  text.on("deselected", function () {
-    events.emit("setActiveElement", "");
-  });
-
-  text.on("modified", function (options: any) {
-    events.emit("modifiedElement", options.target.toObject());
-  });
+  initElementProperty(text);
 
   return text;
+}
+
+// 创建矩形
+export function createRectElement() {
+  const rect = new fabric.Rect({
+    top: 50,
+    left: 100,
+    width: 100,
+    height: 70,
+    fill: "#1677ff",
+    opacity: 1,
+    ...options,
+    _data: {
+      id: getRandomID(10),
+      type: "rect",
+    },
+  });
+
+  initElementProperty(rect);
+
+  return rect;
+}
+
+// 创建圆形
+export function createCircleElement() {
+  const circle = new fabric.Circle({
+    top: 50,
+    left: 100,
+    radius: 50,
+    fill: "#1677ff",
+    ...options,
+    _data: {
+      id: getRandomID(10),
+      type: "circle",
+    },
+  });
+
+  initElementProperty(circle);
+
+  return circle;
+}
+
+// 创建三角形
+export function createTriangleElement() {
+  const triangle = new fabric.Triangle({
+    top: 50, //距离画布上边的距离
+    left: 100, //距离画布左侧的距离，单位是像素
+    width: 100, //矩形的宽度
+    height: 70,
+    fill: "#1677ff",
+    ...options,
+    _data: {
+      id: getRandomID(10),
+      type: "triangle",
+    },
+  });
+
+  initElementProperty(triangle);
+
+  return triangle;
+}
+
+interface Config {
+  svg: string;
+  shape: Shape;
+}
+// 创建形状
+export function createShapeElement(
+  config: Config,
+  callback: (...args: Array<any>) => void
+) {
+  fabric.loadSVGFromString(config.svg, (objects: any, data: any) => {
+    const loadedObject = fabric.util.groupSVGElements(objects, data);
+    loadedObject.set({
+      scaleX:
+        (config as Config).shape.viewBox[0] > 1000
+          ? 200 / (config as Config).shape.viewBox[0]
+          : 1,
+      scaleY:
+        (config as Config).shape.viewBox[1] > 1000
+          ? 200 / (config as Config).shape.viewBox[1]
+          : 1,
+      strokeWidth: (config as Config).shape.viewBox[1] > 1000 ? 50 : 10,
+      stroke: "#000",
+      ...options,
+      _data: {
+        id: getRandomID(10),
+        type: "shape",
+      },
+    });
+    initElementProperty(loadedObject);
+
+    callback(loadedObject);
+  });
 }

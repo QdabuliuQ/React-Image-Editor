@@ -19,22 +19,24 @@ export default memo(function _InputNumber(props: Props) {
           data: JSON.parse(JSON.stringify(element)),
         })
       );
-      console.log(elements);
 
       events.emit("renderElement", {
-        [props.name]: e,
+        key: props.name,
+        value: e,
+        active: props.active,
       });
     }),
     []
   );
-  const elements = useSelector((state: any) => state.element);
-  const element = elements[props.idx];
+  const element = useSelector((state: any) => state.element)[props.idx];
 
-  return (
+  return props.property ? (
     <InputNumber
       {...props.property}
       defaultValue={props.defaultValue}
       onChange={onChange}
     />
+  ) : (
+    <InputNumber defaultValue={props.defaultValue} onChange={onChange} />
   );
 });

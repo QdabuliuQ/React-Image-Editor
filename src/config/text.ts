@@ -1,55 +1,5 @@
 export default [
   {
-    title: "左边距",
-    type: "inputNumber",
-    property: {
-      min: 0,
-      max: 99999,
-      precision: 0,
-    },
-    name: "left",
-  },
-  {
-    title: "上边距",
-    type: "inputNumber",
-    property: {
-      min: 0,
-      max: 99999,
-      precision: 0,
-    },
-    name: "top",
-  },
-  {
-    title: "宽度",
-    type: "inputNumber",
-    property: {
-      min: 0,
-      max: 99999,
-      precision: 0,
-    },
-    name: "width",
-  },
-  {
-    title: "高度",
-    type: "inputNumber",
-    property: {
-      min: 0,
-      max: 99999,
-      precision: 0,
-    },
-    name: "height",
-  },
-  {
-    title: "旋转角度",
-    type: "inputNumber",
-    property: {
-      min: 0,
-      max: 360,
-      precision: 0,
-    },
-    name: "angle",
-  },
-  {
     title: "字体颜色",
     type: "colorPicker",
     property: {},
@@ -110,7 +60,7 @@ export default [
     property: {
       min: 0,
       max: 500,
-      precision: 0,
+      precision: 2,
     },
     name: "lineHeight",
   },
@@ -152,5 +102,19 @@ export default [
       ],
     },
     name: "fontStyle",
+  },
+  {
+    title: "描边颜色",
+    type: "colorPicker",
+    name: "stroke",
+  },
+  {
+    title: "描边宽度",
+    type: "inputNumber",
+    property: {
+      min: 0,
+      max: 100,
+    },
+    name: "strokeWidth",
   },
 ];

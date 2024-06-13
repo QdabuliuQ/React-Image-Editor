@@ -2,6 +2,7 @@ import { memo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ColorPicker } from "antd";
 
+import events from "@/bus";
 import { updateElementByIdx } from "@/store/actions/element";
 import debounce from "@/utils/debounce";
 
@@ -19,15 +20,23 @@ export default memo(function _ColorPicker(props: Props) {
           data: JSON.parse(JSON.stringify(element)),
         })
       );
+
+      events.emit("renderElement", {
+        key: props.name,
+        value: e,
+        active: props.active,
+      });
     }),
     []
   );
 
-  return (
+  return props.property ? (
     <ColorPicker
       {...props.property}
       defaultValue={props.defaultValue}
       onChange={onChange}
     />
+  ) : (
+    <ColorPicker defaultValue={props.defaultValue} onChange={onChange} />
   );
 });

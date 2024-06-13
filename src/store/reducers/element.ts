@@ -1,5 +1,6 @@
 import {
   ADD_ELEMENT,
+  DELETE_ELEMENT_BY_IDX,
   INIT_ELEMENT,
   UPDATE_ELEMENT_BY_IDX,
 } from "@/store/constants/element";
@@ -19,6 +20,9 @@ const elementReducer = (state = initialValue, action: Action<Element>) => {
     return [...state];
   } else if (type === ADD_ELEMENT) {
     return [...state, payload];
+  } else if (type === DELETE_ELEMENT_BY_IDX) {
+    state.splice(payload as unknown as number, 1);
+    return [...state];
   } else {
     return state;
   }

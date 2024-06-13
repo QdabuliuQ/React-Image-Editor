@@ -8,6 +8,8 @@ export function useActiveIdx() {
   const [element, setElement] = useState(null);
   const [idx, setIdx] = useState(-1);
   useEffect(() => {
+    console.log(active, "active");
+
     if (active) {
       for (let i = 0; i < elements.length; i++) {
         if (elements[i]._data.id === active) {

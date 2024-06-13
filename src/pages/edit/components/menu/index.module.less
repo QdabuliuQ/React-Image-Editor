@@ -1,0 +1,64 @@
+.menu-component {
+  width: 230px;
+  height: 100vh;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  .menu-container {
+    padding: 10px 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    .menu-item {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+      align-items: center;
+      cursor: pointer;
+      transition: 0.1s all linear;
+      box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.3);
+      &:hover {
+        background-color: @color;
+        color: #fff;
+      }
+      .icon {
+        margin-top: 5px;
+        font-size: 20px;
+        margin-bottom: 5px;
+      }
+    }
+  }
+  .menu-shape-container {
+    .menu-shape-title {
+      padding: 10px;
+      font-size: 13px;
+      font-weight: bold;
+      color: @color;
+    }
+    :global(.ant-collapse-content-box) {
+      padding: 0 !important;
+    }
+    .menu-shape-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+
+      .shape-item {
+        aspect-ratio: 1/1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.2s all linear;
+        box-shadow: 0 0 2px 0 rgb(228 228 228);
+        .shape-path {
+          transition: 0.2s all linear;
+        }
+        &:hover {
+          background-color: @color;
+          .shape-path {
+            stroke: #fff !important;
+          }
+        }
+      }
+    }
+  }
+}
