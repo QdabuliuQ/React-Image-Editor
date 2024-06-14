@@ -7,10 +7,11 @@ import initAligningGuidelines from "@/libs/guidelines";
 import { updateActive } from "@/store/actions/active";
 import { addElement } from "@/store/actions/element";
 import { Shape } from "@/types/shape";
+import debounce from "@/utils/debounce";
 import * as createMethods from "@/utils/element";
 import { createShapeElement } from "@/utils/element";
 
-import "./index.less";
+import style from "./index.module.less";
 
 const elementMap = new Map();
 let canvas: any;
@@ -75,20 +76,68 @@ function Canvas() {
     }
   };
 
+  const resizeEvent = () => {
+    const { width, height } = (
+      document.getElementById("canvas-component") as HTMLDivElement
+    ).getBoundingClientRect();
+
+    canvas.setWidth(width);
+    canvas.setHeight(height);
+  };
+
   useEffect(() => {
     canvas = new fabric.Canvas("c", {
-      backgroundColor: "#e5e5e5",
       selection: false, // 画布不显示选中
-      width: 500,
-      height: 700,
       fireRightClick: true, //右键点击事件生效
       stopContextMenu: true, //右键点击禁用默认自带的目录
       fireMiddleClick: true, //中间建点击事件生效
       transparentCorners: false,
+      allowTouchScrolling: false,
     });
 
+    const c = new fabric.staticCanvas();
+
+    // 画布缩放
+    canvas.on("mouse:wheel", (opt: any) => {
+      const delta = opt.e.deltaY; // 滚轮，向上滚一下是 -100，向下滚一下是 100
+      let zoom = canvas.getZoom(); // 获取画布当前缩放值
+      zoom *= 0.999 ** delta;
+      if (zoom > 20) zoom = 20; // 限制最大缩放级别
+      if (zoom < 0.01) zoom = 0.01; // 限制最小缩放级别
+      // 以鼠标所在位置为原点缩放
+      canvas.zoomToPoint(
+        {
+          // 关键点
+          x: opt.e.offsetX,
+          y: opt.e.offsetY,
+        },
+        zoom // 传入修改后的缩放级别
+      );
+    });
+
+    //鼠标按下事件
+    canvas.on("mouse:down", function (this: any) {
+      this.panning = true;
+      canvas.selection = false;
+    });
+    //鼠标抬起事件
+    canvas.on("mouse:up", function (this: any) {
+      this.panning = false;
+      canvas.selection = true;
+    });
+    // 移动画布事件
+    canvas.on("mouse:move", function (this: any, e: any) {
+      if (this.panning && e && e.e) {
+        const delta = new fabric.Point(e.e.movementX, e.e.movementY);
+        canvas.relativePan(delta);
+      }
+    });
+
+    // 添加参考线
     initAligningGuidelines(canvas);
 
+    resizeEvent();
+    window.addEventListener("resize", debounce(resizeEvent, 100));
     events.addListener("createElement", createElementEvent);
     events.addListener("deleteElement", deleteElementEvent);
     events.addListener("setActiveElement", setActiveElementEvent);
@@ -105,54 +154,11 @@ function Canvas() {
       canvas.dispose();
       canvas = null;
     };
-
-    // const rect = new fabric.Rect({
-    //   left: 100,
-    //   top: 200,
-    //   originX: "left",
-    //   originY: "top",
-    //   width: 150,
-    //   height: 120,
-    //   angle: 180,
-    //   fill: "rgba(255,0,0,0.5)",
-    //   ...options,
-    //   _data: {
-    //     id: "aLKSD0123",
-    //     type: "rect",
-    //   },
-    // });
-    // rect.toObject = (function (toObject) {
-    //   return function (this: any) {
-    //     return fabric.util.object.extend(toObject.call(this), {
-    //       _data: this._data,
-    //     });
-    //   };
-    // })(rect.toObject);
-    // canvas.add(rect);
-
-    // rect.on("selected", function (options: any) {
-    //   dispatch(updateActive(options.target._data.id));
-    // });
-
-    // // 监听元素取消选中事件
-    // rect.on("deselected", function () {
-    //   dispatch(updateActive(""));
-    // });
-
-    // rect.controls.deleteControl = new fabric.Control({
-    //   x: 0.5,
-    //   y: -0.5,
-    //   offsetY: 16,
-    //   cursorStyle: "pointer",
-    //   mouseUpHandler: deleteObject,
-    //   render: renderIcon,
-    //   cornerSize: 24,
-    // });
   }, []);
 
   return (
-    <div className="canvas-component">
-      <div className="canvas-main">
+    <div id="canvas-component" className={style["canvas-component"]}>
+      <div className={style["canvas-main"]}>
         <canvas id="c"></canvas>
       </div>
     </div>

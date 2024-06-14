@@ -1,5 +1,6 @@
 .menu-component {
   width: 230px;
+  min-width: 230px;
   height: 100vh;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
@@ -16,6 +17,7 @@
       cursor: pointer;
       transition: 0.1s all linear;
       box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.3);
+      user-select: none;
       &:hover {
         background-color: @color;
         color: #fff;
@@ -36,6 +38,10 @@
     }
     :global(.ant-collapse-content-box) {
       padding: 0 !important;
+    }
+    :global(.ant-collapse-header) {
+      border-bottom: 1px solid rgb(229 229 229);
+      box-sizing: border-box;
     }
     .menu-shape-list {
       display: grid;
