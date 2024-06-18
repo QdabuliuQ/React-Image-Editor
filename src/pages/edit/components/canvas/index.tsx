@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef } from "react";
+import { KeyboardEvent, memo, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { fabric } from "fabric";
 
@@ -19,6 +19,7 @@ let canvas: any;
 function Canvas() {
   const workspaceEl = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
+  const isDragging = useRef(false);
 
   // 删除元素
   const deleteElementEvent = (id: string) => {
@@ -87,6 +88,18 @@ function Canvas() {
     canvas.setHeight(height);
   };
 
+  const keypressEvent: (event: Event) => void = (event: any) => {
+    if (event.code === "Space") {
+      isDragging.current = true;
+    }
+  };
+
+  const keyupEvent: (event: Event) => void = (event: any) => {
+    if (event.code === "Space") {
+      isDragging.current = false;
+    }
+  };
+
   useEffect(() => {
     canvas = new fabric.Canvas("c", {
       selection: false, // 画布不显示选中
@@ -97,6 +110,7 @@ function Canvas() {
       allowTouchScrolling: true,
     });
 
+    // 画布元素
     const sketch = new fabric.Rect({
       fill: "#ffffff",
       left: 0,
@@ -163,7 +177,8 @@ function Canvas() {
     //鼠标按下事件
     canvas.on("mouse:down", function (this: any, opt: any) {
       const evt = opt.e;
-      if (evt.altKey === true) {
+      console.log(evt);
+      if (isDragging.current) {
         this.isDragging = true;
         this.lastPosX = evt.clientX;
         this.lastPosY = evt.clientY;
@@ -200,12 +215,17 @@ function Canvas() {
     events.addListener("renderElement", renderElementEvent);
     events.addListener("updateElementLayout", updateElementLayoutEvent);
 
+    document.addEventListener("keypress", keypressEvent);
+    document.addEventListener("keyup", keyupEvent);
+
     return () => {
       events.removeAllListeners("createElement");
       events.removeAllListeners("deleteElement");
       events.removeAllListeners("setActiveElement");
       events.removeAllListeners("renderElement");
       events.removeAllListeners("updateElementLayout");
+      document.removeEventListener("keypress", keypressEvent);
+      document.removeEventListener("keyup", keyupEvent);
 
       canvas.dispose();
       canvas = null;
