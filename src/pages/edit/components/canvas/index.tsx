@@ -183,6 +183,8 @@ function Canvas() {
   // 画布更新
   const updateCanvasEvent = (data: { key: string; value: any }) => {
     const { key, value } = data;
+    console.log(data);
+
     sketch.set({
       [key]: value,
     });
@@ -205,6 +207,8 @@ function Canvas() {
       );
       initCanvas(canvas.current, sketch, zoomLevel);
       setZoom(zoomLevel);
+    } else {
+      canvas.current.renderAll();
     }
   };
 

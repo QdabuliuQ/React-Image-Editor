@@ -33,12 +33,20 @@ function Menu() {
         icon: "i_triangle",
         title: "三角形",
       },
+      {
+        type: "Picture",
+        icon: "i_pic",
+        title: "图片",
+      },
     ],
     []
   );
 
   const clickHandle = useCallback((type: string) => {
-    events.emit("createElement", type);
+    if (type === "Picture") {
+    } else {
+      events.emit("createElement", type);
+    }
   }, []);
 
   const shapeClickEvent = useCallback(
