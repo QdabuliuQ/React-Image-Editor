@@ -1,0 +1,25 @@
+.button-controller {
+  padding: 5px 10px;
+  border-radius: 10px;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 0 10px 0px rgba(0, 0, 0, 0.1);
+  .button-item {
+    padding: 8px;
+    cursor: pointer;
+    transition: 0.1s all linear;
+    border-radius: 10px;
+
+    :global(.iconfont) {
+      font-size: 20px;
+      color: #000;
+    }
+    &:hover {
+      background-color: #f1f1f1;
+    }
+    &:not(:last-child) {
+      margin-right: 10px;
+    }
+  }
+}

@@ -1,10 +1,10 @@
 @font-face {
   font-family: "iconfont"; /* Project id 4581064 */
-  src: url("//at.alicdn.com/t/c/font_4581064_tsey3nfr2wd.woff2?t=1718263363420")
+  src: url("//at.alicdn.com/t/c/font_4581064_l60gixib0d8.woff2?t=1718792859016")
       format("woff2"),
-    url("//at.alicdn.com/t/c/font_4581064_tsey3nfr2wd.woff?t=1718263363420")
+    url("//at.alicdn.com/t/c/font_4581064_l60gixib0d8.woff?t=1718792859016")
       format("woff"),
-    url("//at.alicdn.com/t/c/font_4581064_tsey3nfr2wd.ttf?t=1718263363420")
+    url("//at.alicdn.com/t/c/font_4581064_l60gixib0d8.ttf?t=1718792859016")
       format("truetype");
 }
 
@@ -14,6 +14,50 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.i_clear:before {
+  content: "\e680";
+}
+
+.i_init:before {
+  content: "\e60e";
+}
+
+.i_scale_down:before {
+  content: "\ec13";
+}
+
+.i_scale_up:before {
+  content: "\ec14";
+}
+
+.i_align-left:before {
+  content: "\e72d";
+}
+
+.i_align-bottom:before {
+  content: "\e72e";
+}
+
+.i_align-center:before {
+  content: "\e72f";
+}
+
+.i_align-right:before {
+  content: "\e730";
+}
+
+.i_align-justify:before {
+  content: "\e731";
+}
+
+.i_align-vertically:before {
+  content: "\e732";
+}
+
+.i_align-top:before {
+  content: "\e733";
 }
 
 .i_other:before {

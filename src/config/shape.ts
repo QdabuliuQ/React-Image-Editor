@@ -7,7 +7,7 @@ const config: Array<Config> = [
   {
     type: "colorPicker",
     title: "颜色",
-    name: "stroke",
+    name: "fill",
   },
 ];
 

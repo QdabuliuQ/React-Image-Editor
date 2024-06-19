@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { Button, Tooltip } from "antd";
 
 import events from "@/bus/index";
+import CanvasPanel from "@/components/canvasPanel";
 import ColorPicker from "@/components/colorPicker";
 import ElementInfo from "@/components/elementInfo";
 import InputNumber from "@/components/inputNumber";
@@ -122,12 +123,21 @@ export default memo(function Panel() {
       active,
     });
   }, [active]);
+  const positionClick = useCallback(
+    (position: string) => {
+      events.emit("updateElementPosition", {
+        position,
+        active,
+      });
+    },
+    [active]
+  );
 
   return (
     <div className={style["panel-component"]}>
       <div key={idx} className={style["panel-container"]}>
         {idx == -1 || !config || !elements[idx] ? (
-          <div>common</div>
+          <CanvasPanel />
         ) : (
           <>
             <SplitLine title="基础属性" />
@@ -210,6 +220,57 @@ export default memo(function Panel() {
                   onClick={toDownClickEvent}
                   className={style["group-button-item"]}
                   icon={<i className="iconfont i_to_down"></i>}
+                />
+              </Tooltip>
+            </Button.Group>
+            <Button.Group className={style["group-button"]}>
+              <Tooltip placement="top" title="水平居左">
+                <Button
+                  onClick={() => positionClick("align-left")}
+                  className={style["group-button-item"]}
+                  icon={<i className="iconfont i_align-left"></i>}
+                />
+              </Tooltip>
+              <Tooltip placement="top" title="水平居中">
+                <Button
+                  onClick={() => positionClick("align-center")}
+                  className={style["group-button-item"]}
+                  icon={<i className="iconfont i_align-center"></i>}
+                />
+              </Tooltip>
+              <Tooltip placement="top" title="水平居右">
+                <Button
+                  onClick={() => positionClick("align-right")}
+                  className={style["group-button-item"]}
+                  icon={<i className="iconfont i_align-right"></i>}
+                />
+              </Tooltip>
+              <Tooltip placement="top" title="垂直水平居中">
+                <Button
+                  onClick={() => positionClick("align-justify")}
+                  className={style["group-button-item"]}
+                  icon={<i className="iconfont i_align-justify"></i>}
+                />
+              </Tooltip>
+              <Tooltip placement="top" title="垂直居上">
+                <Button
+                  onClick={() => positionClick("align-top")}
+                  className={style["group-button-item"]}
+                  icon={<i className="iconfont i_align-top"></i>}
+                />
+              </Tooltip>
+              <Tooltip placement="top" title="垂直居中">
+                <Button
+                  onClick={() => positionClick("align-vertically")}
+                  className={style["group-button-item"]}
+                  icon={<i className="iconfont i_align-vertically"></i>}
+                />
+              </Tooltip>
+              <Tooltip placement="top" title="垂直居下">
+                <Button
+                  onClick={() => positionClick("align-bottom")}
+                  className={style["group-button-item"]}
+                  icon={<i className="iconfont i_align-bottom"></i>}
                 />
               </Tooltip>
             </Button.Group>
