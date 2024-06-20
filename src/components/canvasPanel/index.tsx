@@ -31,6 +31,25 @@ export default memo(function CanvasPanel() {
   };
   const widthChange = useCallback(debounce(inputHandle("width")), []);
   const heightChange = useCallback(debounce(inputHandle("height")), []);
+  const fillChange = useCallback(
+    debounce((e) => {
+      dispatch(
+        updateCanvas({
+          key: "fill",
+          value: `rgba(${e.metaColor.r.toFixed(0)}, ${e.metaColor.g.toFixed(
+            0
+          )}, ${e.metaColor.b.toFixed(0)}, ${e.metaColor.a})`,
+        })
+      );
+      events.emit("updateCanvas", {
+        key: "fill",
+        value: `rgba(${e.metaColor.r.toFixed(0)}, ${e.metaColor.g.toFixed(
+          0
+        )}, ${e.metaColor.b.toFixed(0)}, ${e.metaColor.a})`,
+      });
+    }),
+    []
+  );
 
   return (
     <div className={style["canvas-panel"]}>
@@ -52,7 +71,7 @@ export default memo(function CanvasPanel() {
         />
       </OptionItem>
       <OptionItem title="画布颜色">
-        <ColorPicker defaultValue={canvas.fill} />
+        <ColorPicker onChange={fillChange} defaultValue={canvas.fill} />
       </OptionItem>
     </div>
   );
