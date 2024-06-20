@@ -1,11 +1,22 @@
-import { memo } from "react";
-import { Tooltip } from "antd";
+import { memo, useCallback, useState } from "react";
+import { Modal, Tooltip } from "antd";
 
 import { Props } from "./type";
 
 import style from "./index.module.less";
 
 export default memo(function ScaleController(props: Props) {
+  const [isShow, setIsShow] = useState(false);
+  // 打开弹窗
+  const clearClick = useCallback(() => {
+    setIsShow(true);
+  }, []);
+  // 清空画布
+  const confirmEvent = useCallback(() => {
+    setIsShow(false);
+    props.clearEvent();
+  }, []);
+
   return (
     <div className={style["button-controller"]}>
       <Tooltip placement="top" title="缩小">
@@ -33,10 +44,20 @@ export default memo(function ScaleController(props: Props) {
         </div>
       </Tooltip>
       <Tooltip placement="top" title="清空画布">
-        <div className={`${style["button-item"]}`}>
+        <div onClick={clearClick} className={`${style["button-item"]}`}>
           <i className="iconfont i_clear"></i>
         </div>
       </Tooltip>
+      <Modal
+        title="提示"
+        centered
+        open={isShow}
+        onOk={confirmEvent}
+        okText="确定"
+        cancelText="取消"
+      >
+        <span>是否确定清空画布?</span>
+      </Modal>
     </div>
   );
 });

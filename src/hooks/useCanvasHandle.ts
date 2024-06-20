@@ -1,7 +1,12 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
+
+import { updateActive } from "@/store/actions/active";
+import { initElement } from "@/store/actions/element";
 
 export default function useCanvasHandle() {
   const [zoom, setZoom] = useState(0);
+  const dispatch = useDispatch();
 
   // 缩小回调
   const scaleDownEvent = (canvas: any) => {
@@ -31,12 +36,22 @@ export default function useCanvasHandle() {
     );
   };
 
-  // 初始化画布
+  // 清空画布
+  const clearEvent = (canvas: any, elementMap: Map<string, any>) => {
+    for (const [, value] of elementMap) {
+      canvas.remove(value);
+    }
+    dispatch(updateActive(""));
+    dispatch(initElement([]));
+    elementMap.clear();
+    canvas.requestRenderAll();
+  };
 
   return {
     scaleDownEvent,
     scaleUpEvent,
     zoom,
     setZoom,
+    clearEvent,
   };
 }
