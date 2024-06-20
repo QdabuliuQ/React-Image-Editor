@@ -204,3 +204,33 @@ export function createShapeElement(
     callback(loadedObject);
   });
 }
+
+interface ImageOptions {
+  dataUrl: string;
+  width: number;
+  height: number;
+}
+// 创建图片
+export function createImageElement(
+  config: ImageOptions,
+  callback: (image: any) => void
+) {
+  fabric.Image.fromURL(config.dataUrl, function (image: any) {
+    image.set({
+      top: 50, //距离画布上边的距离
+      left: 100, //距离画布左侧的距离，单位是像素
+      scaleX: 150 / config.width,
+      scaleY: 150 / config.height,
+      ...options,
+      _data: {
+        id: getRandomID(10),
+        type: "image",
+      },
+    });
+    console.log(image.filters);
+
+    initElementProperty(image);
+    // 如果需要，你可以在这里触发 canvas 的渲染
+    callback(image);
+  });
+}

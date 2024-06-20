@@ -12,7 +12,7 @@ import { Shape } from "@/types/shape";
 import { calcCanvasZoomLevel } from "@/utils/canvas";
 import debounce from "@/utils/debounce";
 import * as createMethods from "@/utils/element";
-import { createShapeElement } from "@/utils/element";
+import { createImageElement, createShapeElement } from "@/utils/element";
 import initCanvas from "@/utils/initCanvas";
 
 import style from "./index.module.less";
@@ -59,18 +59,34 @@ function Canvas() {
     elementMap.delete(id);
   };
 
-  interface Options {
+  interface SvgOptions {
     svg: string;
     shape: Shape;
+  }
+  interface ImageOptions {
+    dataUrl: string;
+    width: number;
+    height: number;
   }
 
   // 创建元素
   function createElementEvent<T extends string>(
     type: T,
-    options?: T extends "svg" ? Options : never
+    options?: T extends "svg"
+      ? SvgOptions
+      : T extends "image"
+      ? ImageOptions
+      : never
   ) {
     if (type === "svg") {
-      createShapeElement(options as Options, (element: any) => {
+      createShapeElement(options as SvgOptions, (element: any) => {
+        elementMap.set(element._data.id, element);
+        dispatch(addElement(element.toObject()));
+        canvas.current.add(element);
+        canvas.current.setActiveObject(element);
+      });
+    } else if (type === "image") {
+      createImageElement(options as ImageOptions, (element: any) => {
         elementMap.set(element._data.id, element);
         dispatch(addElement(element.toObject()));
         canvas.current.add(element);
@@ -93,13 +109,17 @@ function Canvas() {
   // 渲染元素
   const renderElementEvent = (data: {
     key: string;
-    value: string | number | boolean;
+    value: string | number | boolean | Array<any>;
     active: string;
+    applyFilters?: boolean;
   }) => {
     if (elementMap.has(data.active)) {
-      elementMap.get(data.active).set({
+      console.log(elementMap.get(data.active));
+      const el = elementMap.get(data.active);
+      el.set({
         [data.key]: data.value,
       });
+      data.applyFilters && el.applyFilters();
       canvas.current.renderAll();
     }
   };
@@ -149,8 +169,16 @@ function Canvas() {
     active: string;
   }) => {
     const { position, active } = data;
-
     const element = elementMap.get(active);
+    const eWidth =
+      element._data.type === "image"
+        ? element.width * element.scaleX
+        : element.width;
+    const eHeight =
+      element._data.type === "image"
+        ? element.height * element.scaleY
+        : element.height;
+
     if (!element) return;
     if (position === "align-left") {
       element.set({
@@ -158,16 +186,16 @@ function Canvas() {
       });
     } else if (position === "align-center") {
       element.set({
-        left: width / 2 - element.width / 2,
+        left: width / 2 - eWidth / 2,
       });
     } else if (position === "align-right") {
       element.set({
-        left: width - element.width,
+        left: width - eWidth,
       });
     } else if (position === "align-justify") {
       element.set({
-        left: width / 2 - element.width / 2,
-        top: height / 2 - element.height / 2,
+        left: width / 2 - eWidth / 2,
+        top: height / 2 - eHeight / 2,
       });
     } else if (position === "align-top") {
       element.set({
@@ -175,11 +203,11 @@ function Canvas() {
       });
     } else if (position === "align-vertically") {
       element.set({
-        top: height / 2 - element.height / 2,
+        top: height / 2 - eHeight / 2,
       });
     } else if (position === "align-bottom") {
       element.set({
-        top: height - element.height,
+        top: height - eHeight,
       });
     }
     canvas.current.renderAll();

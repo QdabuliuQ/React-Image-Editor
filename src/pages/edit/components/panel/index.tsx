@@ -6,6 +6,7 @@ import events from "@/bus/index";
 import CanvasPanel from "@/components/canvasPanel";
 import ColorPicker from "@/components/colorPicker";
 import ElementInfo from "@/components/elementInfo";
+import FilterController from "@/components/filterController";
 import InputNumber from "@/components/inputNumber";
 import OptionItem from "@/components/optionItem";
 import Select from "@/components/select";
@@ -193,6 +194,14 @@ export default memo(function Panel() {
                 )}
               </OptionItem>
             ))}
+            {elements[idx]._data.type === "image" ? (
+              <>
+                <SplitLine title="滤镜属性" />
+                <FilterController idx={idx} active={active} />
+              </>
+            ) : (
+              <></>
+            )}
             <Button.Group className={style["group-button"]}>
               <Tooltip placement="top" title="移动到顶层">
                 <Button
