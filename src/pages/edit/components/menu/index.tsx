@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo, useState } from "react";
-import { Collapse } from "antd";
+import { Collapse, message } from "antd";
 
 import { SHAPE_LIST } from "@/assets/js/shape";
 import events from "@/bus";
@@ -12,6 +12,9 @@ import { MenuItem } from "./type";
 import style from "./index.module.less";
 
 function Menu() {
+  const [mode, setMode] = useState("default");
+  const [messageApi, contextHolder] = message.useMessage();
+
   const menus = useMemo(
     () => [
       {
@@ -42,15 +45,41 @@ function Menu() {
     ],
     []
   );
+  const brushMenus = useMemo(
+    () => [
+      {
+        title: "铅笔",
+        type: "Pencil",
+        icon: "i_pencil",
+        mode: "PencilBrush",
+      },
+    ],
+    []
+  );
 
   const [isShow, setIsShow] = useState(false);
-  const clickHandle = useCallback((type: string) => {
+  const clickHandle = (type: string) => {
+    setMode("default");
     if (type === "Picture") {
       setIsShow(true);
     } else {
       events.emit("createElement", type);
     }
-  }, []);
+  };
+  const brushClick = (type: string, _mode: string) => {
+    if ("Mode" + type === mode) {
+      setMode("default");
+      messageApi.open({
+        type: "warning",
+        content: "退出笔刷模式",
+      });
+      events.emit("switchBrush", _mode, false);
+    } else {
+      setMode("Mode" + type);
+      messageApi.info("进入笔刷模式");
+      events.emit("switchBrush", _mode, true);
+    }
+  };
 
   // 取消回调
   const cancelEvent = useCallback(() => {
@@ -105,6 +134,7 @@ function Menu() {
 
   return (
     <div className={style["menu-component"]}>
+      {contextHolder}
       <ImageUpload
         title="插入图片"
         isShow={isShow}
@@ -135,6 +165,34 @@ function Menu() {
           </div>
         ))}
       </div>
+
+      <SplitLine
+        style={{
+          marginTop: "10px",
+        }}
+        title="笔刷"
+      />
+      <div className={style["menu-container"]}>
+        {brushMenus.map((item: MenuItem) => (
+          <div
+            onClick={() => brushClick(item.type, item.mode as string)}
+            key={item.icon}
+            className={`${style["menu-item"]} ${
+              mode === "Mode" + item.type ? style["active-menu-item"] : ""
+            }`}
+          >
+            <i className={`iconfont ${item.icon} ${style.icon}`}></i>
+            <span
+              style={{
+                fontSize: "13px",
+              }}
+            >
+              {item.title}
+            </span>
+          </div>
+        ))}
+      </div>
+
       <SplitLine
         style={{
           marginTop: "10px",

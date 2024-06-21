@@ -9,7 +9,6 @@ import debounce from "@/utils/debounce";
 
 import OptionItem from "../optionItem";
 
-// import Test from "../test";
 import { Props } from "./type";
 
 import style from "./index.module.less";
@@ -27,12 +26,14 @@ interface Params2 {
   min: number;
   max: number;
   step: number;
+  default?: number;
 }
 
 let timer1: NodeJS.Timeout, timer2: NodeJS.Timeout, timer3: NodeJS.Timeout;
 export default memo(function FilterController({ idx, active }: Props) {
   const dispatch = useDispatch();
   const element = useSelector((state: any) => state.element)[idx];
+
   // 开关改变回调
   const changeEvent = useCallback(
     debounce((e: boolean, dom: any) => {
@@ -105,22 +106,25 @@ export default memo(function FilterController({ idx, active }: Props) {
     []
   );
 
+  // 开关切换回调
   const switchEvent = useCallback(
     debounce((e: any) => {
-      console.log(e);
       const { checked } = e.target;
       const dom = e.nativeEvent.target;
+      const effect = dom.getAttribute("data-effect");
+      const idx = dom.getAttribute("data-idx");
+      const propName = dom.getAttribute("data-propname");
+      const _default = dom.getAttribute("data-default");
+
+      element.filters[idx] = checked
+        ? new fabric.Image.filters[effect]({
+            [propName ? propName : effect.toLowerCase()]: _default
+              ? _default
+              : 0,
+          })
+        : null;
       clearTimeout(timer2);
       timer2 = setTimeout(() => {
-        const effect = dom.parentNode.getAttribute("data-effect");
-        const idx = dom.parentNode.getAttribute("data-idx");
-        const propName = dom.parentNode.getAttribute("data-propname");
-        console.log(checked, dom);
-        element.filters[idx] = checked
-          ? new fabric.Image.filters[effect]({
-              [propName ? propName : effect.toLowerCase()]: 0,
-            })
-          : null;
         dispatch(
           updateElementByIdx({
             idx,
@@ -138,54 +142,28 @@ export default memo(function FilterController({ idx, active }: Props) {
     []
   );
 
-  // 开关切换回调
-  const switchHandle = useCallback(
-    ({ target: { checked } }: any, { idx, effect, propName }: Params2) => {
-      element.filters[idx] = checked
-        ? new fabric.Image.filters[effect]({
-            [propName ? propName : effect.toLowerCase()]: 0,
-          })
-        : null;
-
-      if (timer2) clearTimeout(timer2);
-      timer2 = setTimeout(() => {
-        dispatch(
-          updateElementByIdx({
-            idx,
-            data: JSON.parse(JSON.stringify(element)),
-          })
-        );
-        events.emit("renderElement", {
-          key: "filters",
-          value: element.filters,
-          active,
-          applyFilters: true,
-        });
-      }, 100);
-    },
-    []
-  );
-  // 滑块拖拽回调
-  const sliderHanle = useCallback(
-    (e: number, { idx, effect, propName }: Params2) => {
-      if (!element.filters[idx]) return;
-      if (timer3) clearTimeout(timer3);
-      timer3 = setTimeout(() => {
-        element.filters[idx][propName ? propName : effect.toLowerCase()] = e;
-        dispatch(
-          updateElementByIdx({
-            idx,
-            data: JSON.parse(JSON.stringify(element)),
-          })
-        );
-        events.emit("renderElement", {
-          key: "filters",
-          value: element.filters,
-          active,
-          applyFilters: true,
-        });
-      }, 100);
-    },
+  // 创建一个缓存的回调函数
+  const createSliderHandle = useCallback(
+    ({ idx, effect, propName }: Params2) =>
+      (e: number) => {
+        if (!element.filters[idx]) return;
+        if (timer3) clearTimeout(timer3);
+        timer3 = setTimeout(() => {
+          element.filters[idx][propName ? propName : effect.toLowerCase()] = e;
+          dispatch(
+            updateElementByIdx({
+              idx,
+              data: JSON.parse(JSON.stringify(element)),
+            })
+          );
+          events.emit("renderElement", {
+            key: "filters",
+            value: element.filters,
+            active,
+            applyFilters: true,
+          });
+        }, 200);
+      },
     []
   );
 
@@ -230,10 +208,46 @@ export default memo(function FilterController({ idx, active }: Props) {
         idx: 21,
         min: -2,
         max: 2,
+        step: 0.05,
+      },
+      {
+        title: "噪点",
+        effect: "Noise",
+        idx: 9,
+        min: 0,
+        max: 500,
+        step: 10,
+      },
+      {
+        title: "像素",
+        effect: "Pixelate",
+        propName: "blocksize",
+        idx: 10,
+        min: 2,
+        max: 20,
+        step: 1,
+        default: 4,
+      },
+      {
+        title: "模糊",
+        effect: "Blur",
+        idx: 11,
+        min: 0,
+        max: 1,
         step: 0.1,
       },
     ],
     []
+  );
+
+  // 使用 useMemo 缓存每个 item 的 onChange 函数
+  const sliderHandlers = useMemo(
+    () =>
+      params2.reduce((acc: any, item: Params2) => {
+        acc[item.title] = createSliderHandle(item);
+        return acc;
+      }, {}),
+    [params2, createSliderHandle]
   );
 
   return (
@@ -251,28 +265,24 @@ export default memo(function FilterController({ idx, active }: Props) {
       {params2.map((item: Params2) => (
         <OptionItem key={item.title} title={item.title}>
           <div className={style["controller-item"]}>
-            {/* <Checkbox
-              onChange={(e) => switchHandle(e, item)}
-              data-idx={idx}
-              data-effect={item.effect}
-              data-propName={item.propName}
-              defaultChecked={Boolean(element.filters[item.idx])}
-            ></Checkbox> */}
             <Checkbox
               onChange={switchEvent}
-              data-idx={idx}
+              data-idx={item.idx}
               data-effect={item.effect}
               data-propname={item.propName}
+              data-default={item.default}
               defaultChecked={Boolean(element.filters[item.idx])}
             ></Checkbox>
             <Slider
-              onChange={(e) => sliderHanle(e, item)}
+              onChange={sliderHandlers[item.title]}
               disabled={!element.filters[item.idx]}
-              value={
+              defaultValue={
                 element.filters[item.idx]
                   ? element.filters[item.idx][
                       item.propName ? item.propName : item.effect.toLowerCase()
                     ]
+                  : item.default
+                  ? item.default
                   : 0
               }
               step={item.step}

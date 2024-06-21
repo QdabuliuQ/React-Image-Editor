@@ -58,11 +58,12 @@ function _toObject(toObject: any) {
 }
 
 // 元素绑定事件
-function initElementProperty(element: any) {
+export function initElementProperty(element: any) {
+  // 元素添加删除按钮
   element.controls.deleteControl = new fabric.Control({
     x: 0,
-    y: 0.7,
-    offsetY: 16,
+    y: 0.6,
+    offsetY: 10,
     cursorStyle: "pointer",
     mouseUpHandler: deleteObject,
     render: renderIcon,
@@ -70,6 +71,8 @@ function initElementProperty(element: any) {
   });
   element.toObject = _toObject(element.toObject);
 
+  // 如果是线段元素 跳过
+  if (element._data.type === "path") return;
   element.on("selected", function (options: any) {
     events.emit("setActiveElement", options.target._data.id);
   });

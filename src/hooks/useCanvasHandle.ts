@@ -38,13 +38,16 @@ export default function useCanvasHandle() {
 
   // 清空画布
   const clearEvent = (canvas: any, elementMap: Map<string, any>) => {
+    console.log(elementMap);
+
     for (const [, value] of elementMap) {
-      canvas.remove(value);
+      console.log(canvas.remove(value), "map");
     }
     dispatch(updateActive(""));
     dispatch(initElement([]));
     elementMap.clear();
-    canvas.requestRenderAll();
+    canvas.renderAll();
+    console.log(canvas.getObjects());
   };
 
   return {

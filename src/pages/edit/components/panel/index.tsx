@@ -9,6 +9,7 @@ import ElementInfo from "@/components/elementInfo";
 import FilterController from "@/components/filterController";
 import InputNumber from "@/components/inputNumber";
 import OptionItem from "@/components/optionItem";
+import PencilPanel from "@/components/pencilPanel";
 import Select from "@/components/select";
 import Slider from "@/components/slider";
 import SplitLine from "@/components/splitLine";
@@ -137,7 +138,9 @@ export default memo(function Panel() {
   return (
     <div className={style["panel-component"]}>
       <div key={idx} className={style["panel-container"]}>
-        {idx == -1 || !config || !elements[idx] ? (
+        {active === "PencilBrush" ? (
+          <PencilPanel />
+        ) : active === "" || !config || !elements[idx] ? (
           <CanvasPanel />
         ) : (
           <>

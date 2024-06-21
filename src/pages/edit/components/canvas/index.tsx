@@ -12,8 +12,13 @@ import { Shape } from "@/types/shape";
 import { calcCanvasZoomLevel } from "@/utils/canvas";
 import debounce from "@/utils/debounce";
 import * as createMethods from "@/utils/element";
-import { createImageElement, createShapeElement } from "@/utils/element";
+import {
+  createImageElement,
+  createShapeElement,
+  initElementProperty,
+} from "@/utils/element";
 import initCanvas from "@/utils/initCanvas";
+import getRandomID from "@/utils/randomID";
 
 import style from "./index.module.less";
 
@@ -114,7 +119,6 @@ function Canvas() {
     applyFilters?: boolean;
   }) => {
     if (elementMap.has(data.active)) {
-      console.log(elementMap.get(data.active));
       const el = elementMap.get(data.active);
       el.set({
         [data.key]: data.value,
@@ -261,6 +265,62 @@ function Canvas() {
     initCanvas(canvas.current, sketch, zoomLevel);
   };
 
+  // 切换笔刷模式
+  const switchBrushEvent = (type: string, status: boolean) => {
+    canvas.current.isDrawingMode = status;
+    dispatch(updateActive(status ? type : ""));
+    if (status) {
+      // 进入画笔模式
+      // 取消激活元素
+      canvas.current.discardActiveObject();
+      canvas.current["freeDrawingBrush"] = new fabric[type](canvas.current);
+      canvas.current["freeDrawingBrush"].limitedToCanvasSize = true;
+      canvas.current.renderAll();
+    } else {
+      // 退出画笔模式
+      const objects = canvas.current.getObjects();
+
+      // 找到 PencilBrush 绘制的路径元素
+      const pencilBrushPaths = objects.filter(
+        (obj: any) => obj instanceof fabric.Path
+      );
+
+      // 修改路径元素的 cornerStyle 属性为 'round'
+      pencilBrushPaths.forEach((path: any) => {
+        if (path._data && path._data.id) return;
+        const id = getRandomID(10);
+        path.set({
+          transparentCorners: false,
+          hasControls: true,
+          hasBorders: true,
+          visible: true,
+          cornerStyle: "circle",
+          cornerSize: 15,
+          borderColor: "#1677ff",
+          cornerColor: "#1677ff",
+          cornerStrokeColor: "#fff",
+          _data: {
+            id,
+            type: "path",
+          },
+        });
+        initElementProperty(path);
+        dispatch(addElement(path.toObject()));
+        elementMap.set(id, path);
+      });
+
+      // 通知 Canvas 更新
+      canvas.current.requestRenderAll();
+      canvas.current["freeDrawingBrush"] = null;
+    }
+  };
+
+  // 修改笔刷样式
+  const pathStyleModifyEvent = (data: { key: string; value: any }) => {
+    if (!canvas.current["freeDrawingBrush"]) return;
+    canvas.current["freeDrawingBrush"][data.key] = data.value;
+  };
+
   useEffect(() => {
     if (canvas.current) return;
     canvas.current = new fabric.Canvas("c", {
@@ -361,6 +421,8 @@ function Canvas() {
     events.addListener("updateElementLayout", updateElementLayoutEvent);
     events.addListener("updateElementPosition", updateElementPositionEvent);
     events.addListener("updateCanvas", updateCanvasEvent);
+    events.addListener("switchBrush", switchBrushEvent);
+    events.addListener("pathStyleModify", pathStyleModifyEvent);
 
     document.addEventListener("keypress", keypressEvent);
     document.addEventListener("keyup", keyupEvent);
@@ -373,6 +435,8 @@ function Canvas() {
       events.removeAllListeners("updateElementLayout");
       events.removeAllListeners("updateElementPosition");
       events.removeAllListeners("updateCanvas");
+      events.removeAllListeners("switchBrush");
+      events.removeAllListeners("pathStyleModify");
       document.removeEventListener("keypress", keypressEvent);
       document.removeEventListener("keyup", keyupEvent);
 
