@@ -427,6 +427,10 @@ function Canvas() {
     document.addEventListener("keypress", keypressEvent);
     document.addEventListener("keyup", keyupEvent);
 
+    setTimeout(() => {
+      scaleInitEvent();
+    }, 100);
+
     return () => {
       events.removeAllListeners("createElement");
       events.removeAllListeners("deleteElement");
