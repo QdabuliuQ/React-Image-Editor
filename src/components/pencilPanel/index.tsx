@@ -39,7 +39,7 @@ export default memo(function PencilPanel() {
           value: e,
         });
       };
-    } else if (type === "colorPicker") {
+    } else {
       return (e: any) => {
         const color = `rgba(${e.metaColor.r.toFixed(
           0
@@ -53,9 +53,6 @@ export default memo(function PencilPanel() {
         });
       };
     }
-    return (e) => {
-      console.log(e);
-    };
   };
 
   const handle1 = useCallback(debounce(handle("inputNumber", "width")), []);
