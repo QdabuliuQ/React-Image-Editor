@@ -13,7 +13,7 @@ import "@/assets/icon/index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="/react-image-editor">
       <Provider store={store}>
         <App />
       </Provider>
