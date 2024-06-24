@@ -7,7 +7,7 @@ import ButtonController from "@/components/buttonController";
 import useCanvasHandle from "@/hooks/useCanvasHandle";
 import initAligningGuidelines from "@/libs/guidelines";
 import { updateActive } from "@/store/actions/active";
-import { addElement } from "@/store/actions/element";
+import { addElement, deleteElementByIdx } from "@/store/actions/element";
 import { Shape } from "@/types/shape";
 import { calcCanvasZoomLevel } from "@/utils/canvas";
 import debounce from "@/utils/debounce";
@@ -24,7 +24,8 @@ import style from "./index.module.less";
 
 const elementMap = new Map();
 let canvasDom: HTMLCanvasElement;
-let sketch: any;
+let sketch: any,
+  brushType = "";
 function Canvas() {
   const workspaceEl = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
@@ -62,6 +63,8 @@ function Canvas() {
   const deleteElementEvent = (id: string) => {
     canvas.current.remove(elementMap.get(id));
     elementMap.delete(id);
+    dispatch(deleteElementByIdx(id));
+    dispatch(updateActive(""));
   };
 
   interface SvgOptions {
@@ -174,44 +177,39 @@ function Canvas() {
   }) => {
     const { position, active } = data;
     const element = elementMap.get(active);
-    const eWidth =
-      element._data.type === "image"
-        ? element.width * element.scaleX
-        : element.width;
-    const eHeight =
-      element._data.type === "image"
-        ? element.height * element.scaleY
-        : element.height;
+    const info = element.getBoundingRect();
+    const _width = info.width,
+      _height = info.height;
 
     if (!element) return;
     if (position === "align-left") {
       element.set({
-        left: 0,
+        left: _width / 2,
       });
     } else if (position === "align-center") {
       element.set({
-        left: width / 2 - eWidth / 2,
+        left: width / 2,
       });
     } else if (position === "align-right") {
       element.set({
-        left: width - eWidth,
+        left: width - _width / 2,
       });
     } else if (position === "align-justify") {
       element.set({
-        left: width / 2 - eWidth / 2,
-        top: height / 2 - eHeight / 2,
+        left: width / 2,
+        top: height / 2,
       });
     } else if (position === "align-top") {
       element.set({
-        top: 0,
+        top: _height / 2,
       });
     } else if (position === "align-vertically") {
       element.set({
-        top: height / 2 - eHeight / 2,
+        top: height / 2,
       });
     } else if (position === "align-bottom") {
       element.set({
-        top: height - eHeight,
+        top: height - _height / 2,
       });
     }
     canvas.current.renderAll();
@@ -269,11 +267,13 @@ function Canvas() {
   const switchBrushEvent = (type: string, status: boolean) => {
     canvas.current.isDrawingMode = status;
     dispatch(updateActive(status ? type : ""));
+    brushType = type.toLowerCase();
     if (status) {
       // 进入画笔模式
       // 取消激活元素
       canvas.current.discardActiveObject();
       canvas.current["freeDrawingBrush"] = new fabric[type](canvas.current);
+
       canvas.current["freeDrawingBrush"].limitedToCanvasSize = true;
       canvas.current.renderAll();
     } else {
@@ -281,15 +281,21 @@ function Canvas() {
       const objects = canvas.current.getObjects();
 
       // 找到 PencilBrush 绘制的路径元素
-      const pencilBrushPaths = objects.filter(
-        (obj: any) => obj instanceof fabric.Path
+      const brushPaths = objects.filter(
+        (obj: any) =>
+          obj instanceof fabric.Path ||
+          Object.prototype.hasOwnProperty.call(obj, "_objects")
       );
 
       // 修改路径元素的 cornerStyle 属性为 'round'
-      pencilBrushPaths.forEach((path: any) => {
+      brushPaths.forEach((path: any) => {
         if (path._data && path._data.id) return;
         const id = getRandomID(10);
         path.set({
+          left: path.left + path.width / 2,
+          top: path.top + path.height / 2,
+          originX: "center",
+          originY: "center",
           transparentCorners: false,
           hasControls: true,
           hasBorders: true,
@@ -301,7 +307,7 @@ function Canvas() {
           cornerStrokeColor: "#fff",
           _data: {
             id,
-            type: "path",
+            type: brushType,
           },
         });
         initElementProperty(path);
@@ -313,6 +319,7 @@ function Canvas() {
       canvas.current.requestRenderAll();
       canvas.current["freeDrawingBrush"] = null;
     }
+    brushType = status ? brushType : "";
   };
 
   // 修改笔刷样式
