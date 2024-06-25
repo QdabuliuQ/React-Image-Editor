@@ -4,6 +4,7 @@ import { fabric } from "fabric";
 
 import events from "@/bus";
 import debounce from "@/utils/debounce";
+import panelHandle from "@/utils/panelHandle";
 
 import OptionItem from "../optionItem";
 import SplitLine from "../splitLine";
@@ -30,34 +31,18 @@ export default memo(function PencilPanel() {
     color: brushProperty.shadowColor, // 投影颜色
   };
 
-  const handle = (type: string, key: string) => {
-    if (type === "inputNumber" || type === "switch" || type === "select") {
-      return (e: number | null) => {
-        (brushProperty as any)[key] = e;
-        events.emit("pathStyleModify", {
-          key,
-          value: e,
-        });
-      };
-    } else {
-      return (e: any) => {
-        const color = `rgba(${e.metaColor.r.toFixed(
-          0
-        )}, ${e.metaColor.g.toFixed(0)}, ${e.metaColor.b.toFixed(0)}, ${
-          e.metaColor.a
-        })`;
-        (brushProperty as any)[key] = color;
-        events.emit("pathStyleModify", {
-          key,
-          value: color,
-        });
-      };
-    }
-  };
-
-  const handle1 = useCallback(debounce(handle("inputNumber", "width")), []);
-  const handle2 = useCallback(debounce(handle("colorPicker", "color")), []);
-  const handle3 = useCallback(debounce(handle("select", "strokeLineCap")), []);
+  const handle1 = useCallback(
+    debounce(panelHandle("inputNumber", "width", brushProperty)),
+    []
+  );
+  const handle2 = useCallback(
+    debounce(panelHandle("colorPicker", "color", brushProperty)),
+    []
+  );
+  const handle3 = useCallback(
+    debounce(panelHandle("select", "strokeLineCap", brushProperty)),
+    []
+  );
   const dashChange = useCallback(
     debounce((e: boolean) => {
       events.emit("pathStyleModify", {

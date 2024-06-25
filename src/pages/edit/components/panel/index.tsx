@@ -13,13 +13,10 @@ import PencilPanel from "@/components/pencilPanel";
 import Select from "@/components/select";
 import Slider from "@/components/slider";
 import SplitLine from "@/components/splitLine";
+import SprayPanel from "@/components/sprayPanel";
 import Switch from "@/components/switch";
 import { useActiveIdx } from "@/hooks/useActiveIdx";
-import { updateActive } from "@/store/actions/active";
-import {
-  deleteElementByIdx,
-  updateElementByIdx,
-} from "@/store/actions/element";
+import { updateElementByIdx } from "@/store/actions/element";
 import { getConfig } from "@/utils/getConfig";
 
 import style from "./index.module.less";
@@ -77,27 +74,6 @@ export default memo(function Panel() {
       const idx = getIdx();
       if (idx === -1) return;
       events.emit("deleteElement", active);
-      dispatch(deleteElementByIdx(idx));
-      dispatch(updateActive(""));
-    }
-  }, [active]);
-
-  const visibleEvent = useCallback(() => {
-    if (active) {
-      const idx = getIdx();
-      if (idx === -1) return;
-      elements[idx].visible = !elements[idx].visible;
-      dispatch(
-        updateElementByIdx({
-          idx,
-          data: JSON.parse(JSON.stringify(elements[idx])),
-        })
-      );
-      events.emit("renderElement", {
-        key: "visible",
-        value: elements[idx].visible,
-        active,
-      });
     }
   }, [active]);
 
@@ -140,6 +116,8 @@ export default memo(function Panel() {
       <div key={idx} className={style["panel-container"]}>
         {active === "PencilBrush" ? (
           <PencilPanel />
+        ) : active === "SprayBrush" ? (
+          <SprayPanel />
         ) : active === "" || !config || !elements[idx] ? (
           <CanvasPanel />
         ) : (
@@ -288,16 +266,6 @@ export default memo(function Panel() {
             </Button.Group>
             <Button block={true} type="primary" danger onClick={deleteEvent}>
               删除元素
-            </Button>
-            <Button
-              style={{
-                marginTop: "15px",
-              }}
-              onClick={visibleEvent}
-              block={true}
-              type="primary"
-            >
-              {elements[idx].visible ? "隐藏元素" : "显示元素"}
             </Button>
           </>
         )}

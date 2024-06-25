@@ -21,8 +21,13 @@ const elementReducer = (state = initialValue, action: Action<Element>) => {
   } else if (type === ADD_ELEMENT) {
     return [...state, payload];
   } else if (type === DELETE_ELEMENT_BY_IDX) {
-    state.splice(payload as unknown as number, 1);
-    return [...state];
+    for (let i = 0; i < state.length; i++) {
+      if ((state[i] as any)._data.id === payload) {
+        state.splice(i as unknown as number, 1);
+        return [...state];
+      }
+    }
+    return state;
   } else {
     return state;
   }

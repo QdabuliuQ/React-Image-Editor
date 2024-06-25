@@ -31,7 +31,7 @@ export function addElement(payload: any) {
 }
 
 // 删除元素
-export function deleteElementByIdx(payload: number) {
+export function deleteElementByIdx(payload: string) {
   return {
     type: DELETE_ELEMENT_BY_IDX,
     payload,

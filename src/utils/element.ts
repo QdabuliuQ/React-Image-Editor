@@ -36,6 +36,8 @@ function renderIcon(
 }
 
 const options = {
+  originX: "center",
+  originY: "center",
   transparentCorners: false,
   hasControls: true,
   hasBorders: true,
@@ -72,7 +74,7 @@ export function initElementProperty(element: any) {
   element.toObject = _toObject(element.toObject);
 
   // 如果是线段元素 跳过
-  if (element._data.type === "path") return;
+  // if (element._data.type === "path") return;
   element.on("selected", function (options: any) {
     events.emit("setActiveElement", options.target._data.id);
   });
@@ -90,8 +92,8 @@ export function initElementProperty(element: any) {
 // 创建文本
 export function createTextElement() {
   const text = new fabric.Textbox("Lorum ipsum dolor sit amet", {
-    left: 50,
-    top: 50,
+    left: 100,
+    top: 100,
     width: 150,
     height: 50,
     angle: 0,
@@ -117,11 +119,12 @@ export function createTextElement() {
 // 创建矩形
 export function createRectElement() {
   const rect = new fabric.Rect({
-    top: 50,
+    top: 100,
     left: 100,
     width: 100,
     height: 70,
     fill: "#1677ff",
+
     opacity: 1,
     ...options,
     _data: {
@@ -138,7 +141,7 @@ export function createRectElement() {
 // 创建圆形
 export function createCircleElement() {
   const circle = new fabric.Circle({
-    top: 50,
+    top: 100,
     left: 100,
     radius: 50,
     fill: "#1677ff",
@@ -157,7 +160,7 @@ export function createCircleElement() {
 // 创建三角形
 export function createTriangleElement() {
   const triangle = new fabric.Triangle({
-    top: 50, //距离画布上边的距离
+    top: 100, //距离画布上边的距离
     left: 100, //距离画布左侧的距离，单位是像素
     width: 100, //矩形的宽度
     height: 70,
@@ -186,6 +189,8 @@ export function createShapeElement(
   fabric.loadSVGFromString(config.svg, (objects: any, data: any) => {
     const loadedObject = fabric.util.groupSVGElements(objects, data);
     loadedObject.set({
+      top: 100,
+      left: 100,
       scaleX:
         (config as Config).shape.viewBox[0] > 1000
           ? 200 / (config as Config).shape.viewBox[0]
@@ -230,8 +235,6 @@ export function createImageElement(
         type: "image",
       },
     });
-    console.log(image.filters);
-
     initElementProperty(image);
     // 如果需要，你可以在这里触发 canvas 的渲染
     callback(image);
