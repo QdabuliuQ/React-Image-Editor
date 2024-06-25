@@ -1,10 +1,10 @@
 @font-face {
   font-family: "iconfont"; /* Project id 4581064 */
-  src: url("//at.alicdn.com/t/c/font_4581064_2kk8pb5mc5f.woff2?t=1719217921474")
+  src: url("//at.alicdn.com/t/c/font_4581064_phkzcxuvwg.woff2?t=1719300322168")
       format("woff2"),
-    url("//at.alicdn.com/t/c/font_4581064_2kk8pb5mc5f.woff?t=1719217921474")
+    url("//at.alicdn.com/t/c/font_4581064_phkzcxuvwg.woff?t=1719300322168")
       format("woff"),
-    url("//at.alicdn.com/t/c/font_4581064_2kk8pb5mc5f.ttf?t=1719217921474")
+    url("//at.alicdn.com/t/c/font_4581064_phkzcxuvwg.ttf?t=1719300322168")
       format("truetype");
 }
 
@@ -14,6 +14,34 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.i_delete:before {
+  content: "\e74b";
+}
+
+.i_lock:before {
+  content: "\e669";
+}
+
+.i_unlock:before {
+  content: "\e6e6";
+}
+
+.i_cut:before {
+  content: "\e6dc";
+}
+
+.i_copy:before {
+  content: "\e61a";
+}
+
+.i_paste:before {
+  content: "\e619";
+}
+
+.i_circleBrush:before {
+  content: "\e689";
 }
 
 .i_spray:before {

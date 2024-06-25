@@ -90,7 +90,9 @@ export function initElementProperty(element: any) {
 }
 
 // 创建文本
-export function createTextElement() {
+export function createTextElement(
+  customOptions: { [propName: string]: any } = {}
+) {
   const text = new fabric.Textbox("Lorum ipsum dolor sit amet", {
     left: 100,
     top: 100,
@@ -109,6 +111,7 @@ export function createTextElement() {
       id: getRandomID(10),
       type: "text",
     },
+    ...customOptions,
   });
 
   initElementProperty(text);
@@ -117,7 +120,9 @@ export function createTextElement() {
 }
 
 // 创建矩形
-export function createRectElement() {
+export function createRectElement(
+  customOptions: { [propName: string]: any } = {}
+) {
   const rect = new fabric.Rect({
     top: 100,
     left: 100,
@@ -131,6 +136,7 @@ export function createRectElement() {
       id: getRandomID(10),
       type: "rect",
     },
+    ...customOptions,
   });
 
   initElementProperty(rect);
@@ -139,7 +145,9 @@ export function createRectElement() {
 }
 
 // 创建圆形
-export function createCircleElement() {
+export function createCircleElement(
+  customOptions: { [propName: string]: any } = {}
+) {
   const circle = new fabric.Circle({
     top: 100,
     left: 100,
@@ -150,6 +158,7 @@ export function createCircleElement() {
       id: getRandomID(10),
       type: "circle",
     },
+    ...customOptions,
   });
 
   initElementProperty(circle);
@@ -158,7 +167,9 @@ export function createCircleElement() {
 }
 
 // 创建三角形
-export function createTriangleElement() {
+export function createTriangleElement(
+  customOptions: { [propName: string]: any } = {}
+) {
   const triangle = new fabric.Triangle({
     top: 100, //距离画布上边的距离
     left: 100, //距离画布左侧的距离，单位是像素
@@ -170,6 +181,7 @@ export function createTriangleElement() {
       id: getRandomID(10),
       type: "triangle",
     },
+    ...customOptions,
   });
 
   initElementProperty(triangle);
@@ -184,21 +196,22 @@ interface Config {
 // 创建形状
 export function createShapeElement(
   config: Config,
-  callback: (...args: Array<any>) => void
+  callback: (...args: Array<any>) => void,
+  customOptions: { [propName: string]: any } = {}
 ) {
   fabric.loadSVGFromString(config.svg, (objects: any, data: any) => {
     const loadedObject = fabric.util.groupSVGElements(objects, data);
     loadedObject.set({
-      top: 100,
-      left: 100,
+      top: 50,
+      left: 50,
       scaleX:
         (config as Config).shape.viewBox[0] > 1000
-          ? 200 / (config as Config).shape.viewBox[0]
-          : 1,
+          ? 100 / (config as Config).shape.viewBox[0]
+          : 0.5,
       scaleY:
         (config as Config).shape.viewBox[1] > 1000
-          ? 200 / (config as Config).shape.viewBox[1]
-          : 1,
+          ? 100 / (config as Config).shape.viewBox[1]
+          : 0.5,
       strokeWidth: (config as Config).shape.viewBox[1] > 1000 ? 50 : 10,
       stroke: "#000",
       ...options,
@@ -206,6 +219,7 @@ export function createShapeElement(
         id: getRandomID(10),
         type: "shape",
       },
+      ...customOptions,
     });
     initElementProperty(loadedObject);
 
@@ -218,6 +232,7 @@ interface ImageOptions {
   width: number;
   height: number;
 }
+
 // 创建图片
 export function createImageElement(
   config: ImageOptions,

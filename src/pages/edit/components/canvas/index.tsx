@@ -4,7 +4,9 @@ import { fabric } from "fabric";
 
 import events from "@/bus";
 import ButtonController from "@/components/buttonController";
+import ContextMenu from "@/components/contextMenu";
 import useCanvasHandle from "@/hooks/useCanvasHandle";
+import useElementContextMenu from "@/hooks/useElementContextMenu";
 import initAligningGuidelines from "@/libs/guidelines";
 import { updateActive } from "@/store/actions/active";
 import { addElement, deleteElementByIdx } from "@/store/actions/element";
@@ -84,15 +86,20 @@ function Canvas() {
       ? SvgOptions
       : T extends "image"
       ? ImageOptions
-      : never
+      : never,
+    customOptions: { [propName: string]: any } = {}
   ) {
     if (type === "svg") {
-      createShapeElement(options as SvgOptions, (element: any) => {
-        elementMap.set(element._data.id, element);
-        dispatch(addElement(element.toObject()));
-        canvas.current.add(element);
-        canvas.current.setActiveObject(element);
-      });
+      createShapeElement(
+        options as SvgOptions,
+        (element: any) => {
+          elementMap.set(element._data.id, element);
+          dispatch(addElement(element.toObject()));
+          canvas.current.add(element);
+          canvas.current.setActiveObject(element);
+        },
+        customOptions
+      );
     } else if (type === "image") {
       createImageElement(options as ImageOptions, (element: any) => {
         elementMap.set(element._data.id, element);
@@ -101,7 +108,9 @@ function Canvas() {
         canvas.current.setActiveObject(element);
       });
     } else {
-      const element = (createMethods as any)[`create${type}Element`]();
+      const element = (createMethods as any)[`create${type}Element`](
+        customOptions
+      );
       elementMap.set(element._data.id, element);
       dispatch(addElement(element.toObject()));
       canvas.current.add(element);
@@ -328,6 +337,16 @@ function Canvas() {
     canvas.current["freeDrawingBrush"][data.key] = data.value;
   };
 
+  // 获取菜单项
+  const {
+    contextMenuRef,
+    contextMenuData,
+    menuClick,
+    elementInfo,
+    offsetX,
+    offsetY,
+  } = useElementContextMenu();
+
   useEffect(() => {
     if (canvas.current) return;
     canvas.current = new fabric.Canvas("c", {
@@ -382,11 +401,21 @@ function Canvas() {
     //鼠标按下事件
     canvas.current.on("mouse:down", function (this: any, opt: any) {
       const evt = opt.e;
-      if (pressSpace.current) {
+      if (opt.button === 1 && pressSpace.current) {
         this.isDragging = true;
         this.lastPosX = evt.clientX;
         this.lastPosY = evt.clientY;
         canvasDom.style.cursor = "grabbing";
+      } else if (opt.button === 3) {
+        if (!opt.target || !opt.target._data) return;
+        (
+          contextMenuRef.current as unknown as {
+            show: (x: number, y: number) => void;
+          }
+        ).show(evt.clientX, evt.clientY);
+        offsetX.current = evt.clientX;
+        offsetY.current = evt.clientY;
+        (elementInfo as any).current = opt.target;
       }
     });
     //鼠标抬起事件
@@ -414,6 +443,29 @@ function Canvas() {
       } else if (pressSpace.current) {
         canvasDom.style.cursor = "grab";
       }
+    });
+
+    canvas.current.on("drop", function (opt: { e: any }) {
+      // 画布元素距离浏览器左侧和顶部的距离
+      const offset = {
+        left: canvas.current.getSelectionElement().getBoundingClientRect().left,
+        top: canvas.current.getSelectionElement().getBoundingClientRect().top,
+      };
+
+      // 鼠标坐标转换成画布的坐标（未经过缩放和平移的坐标）
+      const point = {
+        x: opt.e.x - offset.left,
+        y: opt.e.y - offset.top,
+      };
+
+      // 转换后的坐标，restorePointerVpt 不受视窗变换的影响
+      const pointerVpt = canvas.current.restorePointerVpt(point);
+      const dargInfo = JSON.parse(sessionStorage.getItem("dragInfo") as string);
+      createElementEvent(dargInfo.type, dargInfo.options, {
+        top: pointerVpt.y,
+        left: pointerVpt.x,
+      });
+      sessionStorage.removeItem("dragItem");
     });
 
     // 添加参考线
@@ -469,6 +521,11 @@ function Canvas() {
           clearEvent={_clearEvent}
         />
       </div>
+      <ContextMenu
+        ref={contextMenuRef}
+        menuData={contextMenuData}
+        menuClick={(title: string) => menuClick(title, canvas.current)}
+      />
     </div>
   );
 }

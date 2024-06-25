@@ -4,6 +4,7 @@ import { Button, Tooltip } from "antd";
 
 import events from "@/bus/index";
 import CanvasPanel from "@/components/canvasPanel";
+import CirclePanel from "@/components/circlePanel";
 import ColorPicker from "@/components/colorPicker";
 import ElementInfo from "@/components/elementInfo";
 import FilterController from "@/components/filterController";
@@ -118,6 +119,8 @@ export default memo(function Panel() {
           <PencilPanel />
         ) : active === "SprayBrush" ? (
           <SprayPanel />
+        ) : active === "CircleBrush" ? (
+          <CirclePanel />
         ) : active === "" || !config || !elements[idx] ? (
           <CanvasPanel />
         ) : (
