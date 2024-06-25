@@ -7,8 +7,6 @@ import panelHandle from "@/utils/panelHandle";
 import OptionItem from "../optionItem";
 import SplitLine from "../splitLine";
 
-import style from "./index.module.less";
-
 export default memo(function SprayPanel() {
   const brushProperty = useMemo(
     () => ({
@@ -48,7 +46,7 @@ export default memo(function SprayPanel() {
   );
 
   return (
-    <div className={style["spray-panel"]}>
+    <>
       <SplitLine title="笔刷属性" />
       <OptionItem title="笔刷宽度">
         <InputNumber
@@ -89,6 +87,6 @@ export default memo(function SprayPanel() {
       <OptionItem title="颜色">
         <ColorPicker onChange={handle6} defaultValue={brushProperty.color} />
       </OptionItem>
-    </div>
+    </>
   );
 });

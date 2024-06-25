@@ -59,6 +59,12 @@ function Menu() {
         icon: "i_spray",
         mode: "SprayBrush",
       },
+      {
+        title: "圆形笔刷",
+        type: "Circle",
+        icon: "i_circleBrush",
+        mode: "CircleBrush",
+      },
     ],
     []
   );
@@ -140,6 +146,15 @@ function Menu() {
     []
   );
 
+  const dragStartEvent = (type: string) => {
+    sessionStorage.setItem(
+      "dragInfo",
+      JSON.stringify({
+        type,
+      })
+    );
+  };
+
   const reg = useMemo(() => /Mode.*/, []);
 
   return (
@@ -160,6 +175,8 @@ function Menu() {
       <div className={style["menu-container"]}>
         {menus.map((item: MenuItem) => (
           <div
+            draggable={item.type !== "Picture"}
+            onDragStart={() => dragStartEvent(item.type)}
             onClick={() => clickHandle(item.type)}
             key={item.icon}
             className={`${style["menu-item"]} ${
