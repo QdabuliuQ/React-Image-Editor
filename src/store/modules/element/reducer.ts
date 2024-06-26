@@ -3,7 +3,7 @@ import {
   DELETE_ELEMENT_BY_IDX,
   INIT_ELEMENT,
   UPDATE_ELEMENT_BY_IDX,
-} from "@/store/constants/element";
+} from "./constant";
 import { Element } from "@/types/element";
 import { Action } from "@/types/reduxType";
 

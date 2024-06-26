@@ -1,4 +1,4 @@
-import { UPDATE_ACTIVE } from "@/store/constants/active";
+import { UPDATE_ACTIVE } from "./constant";
 import { Action } from "@/types/reduxType";
 
 const initialValue: string = "";

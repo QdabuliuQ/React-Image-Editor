@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 
-import { updateActive } from "@/store/actions/active";
-import { initElement } from "@/store/actions/element";
+import { updateActive } from "@/store/modules/active/action";
+import { initElement } from "@/store/modules/element/action";
 
 export default function useCanvasHandle() {
   const [zoom, setZoom] = useState(0);

@@ -8,8 +8,8 @@ import ContextMenu from "@/components/contextMenu";
 import useCanvasHandle from "@/hooks/useCanvasHandle";
 import useElementContextMenu from "@/hooks/useElementContextMenu";
 import initAligningGuidelines from "@/libs/guidelines";
-import { updateActive } from "@/store/actions/active";
-import { addElement, deleteElementByIdx } from "@/store/actions/element";
+import { updateActive } from "@/store/modules/active/action";
+import { addElement, deleteElementByIdx } from "@/store/modules/element/action";
 import { Shape } from "@/types/shape";
 import { calcCanvasZoomLevel } from "@/utils/canvas";
 import debounce from "@/utils/debounce";
@@ -19,6 +19,7 @@ import {
   createShapeElement,
   initElementProperty,
 } from "@/utils/element";
+import { exportFileToPng, exportFileToSvg } from "@/utils/exportFile";
 import initCanvas from "@/utils/initCanvas";
 import getRandomID from "@/utils/randomID";
 
@@ -155,6 +156,8 @@ function Canvas() {
 
     canvas.current.setWidth(width);
     canvas.current.setHeight(height);
+
+    scaleInitEvent();
   };
 
   // 空格按下
@@ -227,8 +230,6 @@ function Canvas() {
   // 画布更新
   const updateCanvasEvent = (data: { key: string; value: any }) => {
     const { key, value } = data;
-    console.log(data);
-
     sketch.set({
       [key]: value,
     });
@@ -238,20 +239,21 @@ function Canvas() {
     } else if (key === "height") {
       height = value;
     }
+    const zoomLevel = calcCanvasZoomLevel(
+      {
+        width: canvas.current.width,
+        height: canvas.current.height,
+      },
+      {
+        width,
+        height,
+      }
+    );
     if (key === "width" || key === "height") {
-      const zoomLevel = calcCanvasZoomLevel(
-        {
-          width: canvas.current.width,
-          height: canvas.current.height,
-        },
-        {
-          width,
-          height,
-        }
-      );
       initCanvas(canvas.current, sketch, zoomLevel);
       setZoom(zoomLevel);
     } else {
+      initCanvas(canvas.current, sketch, zoomLevel);
       canvas.current.renderAll();
     }
   };
@@ -335,6 +337,17 @@ function Canvas() {
   const pathStyleModifyEvent = (data: { key: string; value: any }) => {
     if (!canvas.current["freeDrawingBrush"]) return;
     canvas.current["freeDrawingBrush"][data.key] = data.value;
+  };
+
+  // 导出文件
+  const exportFileEvent = (type: string) => {
+    console.log(type);
+
+    if (type === "png") {
+      exportFileToPng(canvas.current);
+    } else if (type === "svg") {
+      exportFileToSvg(canvas.current);
+    }
   };
 
   // 获取菜单项
@@ -469,7 +482,7 @@ function Canvas() {
     });
 
     // 添加参考线
-    initAligningGuidelines(canvas.current);
+    // initAligningGuidelines(canvas.current);
 
     resizeEvent();
     window.addEventListener("resize", debounce(resizeEvent, 100));
@@ -482,6 +495,7 @@ function Canvas() {
     events.addListener("updateCanvas", updateCanvasEvent);
     events.addListener("switchBrush", switchBrushEvent);
     events.addListener("pathStyleModify", pathStyleModifyEvent);
+    events.addListener("exportFile", exportFileEvent);
 
     document.addEventListener("keypress", keypressEvent);
     document.addEventListener("keyup", keyupEvent);
@@ -500,9 +514,11 @@ function Canvas() {
       events.removeAllListeners("updateCanvas");
       events.removeAllListeners("switchBrush");
       events.removeAllListeners("pathStyleModify");
+      events.removeAllListeners("exportFile");
       document.removeEventListener("keypress", keypressEvent);
       document.removeEventListener("keyup", keyupEvent);
 
+      canvas.current.clear();
       canvas.current.dispose();
       canvas.current = null;
     };

@@ -8,6 +8,7 @@ import CirclePanel from "@/components/circlePanel";
 import ColorPicker from "@/components/colorPicker";
 import ElementInfo from "@/components/elementInfo";
 import FilterController from "@/components/filterController";
+import FontSelect from "@/components/fontSelect";
 import InputNumber from "@/components/inputNumber";
 import OptionItem from "@/components/optionItem";
 import PencilPanel from "@/components/pencilPanel";
@@ -17,7 +18,7 @@ import SplitLine from "@/components/splitLine";
 import SprayPanel from "@/components/sprayPanel";
 import Switch from "@/components/switch";
 import { useActiveIdx } from "@/hooks/useActiveIdx";
-import { updateElementByIdx } from "@/store/actions/element";
+import { updateElementByIdx } from "@/store/modules/element/action";
 import { getConfig } from "@/utils/getConfig";
 
 import style from "./index.module.less";
@@ -178,6 +179,15 @@ export default memo(function Panel() {
                 )}
               </OptionItem>
             ))}
+            {elements[idx]._data.type === "text" ? (
+              <FontSelect
+                fontFamily={elements[idx].fontFamily}
+                idx={idx}
+                active={active}
+              />
+            ) : (
+              <></>
+            )}
             {elements[idx]._data.type === "image" ? (
               <>
                 <SplitLine title="滤镜属性" />

@@ -4,7 +4,7 @@ import { ColorPicker, InputNumber } from "antd";
 
 import events from "@/bus";
 import SplitLine from "@/components/splitLine";
-import { updateCanvas } from "@/store/actions/canvas";
+import { updateCanvas } from "@/store/modules/canvas/action";
 import debounce from "@/utils/debounce";
 
 import OptionItem from "../optionItem";

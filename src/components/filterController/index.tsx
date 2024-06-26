@@ -4,7 +4,7 @@ import { Checkbox, Slider, Switch } from "antd";
 import { fabric } from "fabric";
 
 import events from "@/bus";
-import { updateElementByIdx } from "@/store/actions/element";
+import { updateElementByIdx } from "@/store/modules/element/action";
 import debounce from "@/utils/debounce";
 
 import OptionItem from "../optionItem";

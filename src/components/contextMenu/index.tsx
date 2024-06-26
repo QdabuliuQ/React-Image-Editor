@@ -7,10 +7,11 @@ import {
   useState,
 } from "react";
 
+import useClickOutside from "@/hooks/useClickOutside";
+
 import { MenuItem, Props } from "./type";
 
 import style from "./index.module.less";
-import useClickOutside from "@/hooks/useClickOutside";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export default memo(

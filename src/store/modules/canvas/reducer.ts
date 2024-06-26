@@ -1,4 +1,4 @@
-import { INIT_CANVAS, UPDATE_CANVAS } from "@/store/constants/canvas";
+import { INIT_CANVAS, UPDATE_CANVAS } from "./constant";
 import { Canvas } from "@/types/canvas";
 import { Action } from "@/types/reduxType";
 

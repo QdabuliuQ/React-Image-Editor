@@ -2,6 +2,8 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { Modal, Tooltip } from "antd";
 
+import events from "@/bus";
+
 import { Props } from "./type";
 
 import style from "./index.module.less";
@@ -22,6 +24,13 @@ export default memo(function ScaleController(props: Props) {
   const confirmEvent = useCallback(() => {
     setIsShow(false);
     props.clearEvent();
+  }, []);
+
+  const exportFileToSvg = useCallback(() => {
+    events.emit("exportFile", "svg");
+  }, []);
+  const exportFileToPng = useCallback(() => {
+    events.emit("exportFile", "png");
   }, []);
 
   useEffect(() => {
@@ -64,6 +73,26 @@ export default memo(function ScaleController(props: Props) {
           }`}
         >
           <i className="iconfont i_clear"></i>
+        </div>
+      </Tooltip>
+      <Tooltip placement="top" title="导出 PNG">
+        <div
+          onClick={exportFileToPng}
+          className={`${style["button-item"]} ${
+            reg.test(active) ? style["disable-button-item"] : ""
+          }`}
+        >
+          <i className="iconfont i_png"></i>
+        </div>
+      </Tooltip>
+      <Tooltip placement="top" title="导出 SVG">
+        <div
+          onClick={exportFileToSvg}
+          className={`${style["button-item"]} ${
+            reg.test(active) ? style["disable-button-item"] : ""
+          }`}
+        >
+          <i className="iconfont i_svg"></i>
         </div>
       </Tooltip>
       <Modal

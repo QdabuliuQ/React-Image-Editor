@@ -85,7 +85,9 @@ export function initElementProperty(element: any) {
   });
 
   element.on("modified", function (options: any) {
-    events.emit("modifiedElement", options.target.toObject());
+    if (options.target) {
+      events.emit("modifiedElement", options.target.toObject());
+    }
   });
 }
 
