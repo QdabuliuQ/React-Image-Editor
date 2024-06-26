@@ -19,6 +19,7 @@ import {
   createShapeElement,
   initElementProperty,
 } from "@/utils/element";
+import { exportFileToPng, exportFileToSvg } from "@/utils/exportFile";
 import initCanvas from "@/utils/initCanvas";
 import getRandomID from "@/utils/randomID";
 
@@ -227,8 +228,6 @@ function Canvas() {
   // 画布更新
   const updateCanvasEvent = (data: { key: string; value: any }) => {
     const { key, value } = data;
-    console.log(data);
-
     sketch.set({
       [key]: value,
     });
@@ -335,6 +334,17 @@ function Canvas() {
   const pathStyleModifyEvent = (data: { key: string; value: any }) => {
     if (!canvas.current["freeDrawingBrush"]) return;
     canvas.current["freeDrawingBrush"][data.key] = data.value;
+  };
+
+  // 导出文件
+  const exportFileEvent = (type: string) => {
+    console.log(type);
+
+    if (type === "png") {
+      exportFileToPng(canvas.current);
+    } else if (type === "svg") {
+      exportFileToSvg(canvas.current);
+    }
   };
 
   // 获取菜单项
@@ -469,7 +479,7 @@ function Canvas() {
     });
 
     // 添加参考线
-    initAligningGuidelines(canvas.current);
+    // initAligningGuidelines(canvas.current);
 
     resizeEvent();
     window.addEventListener("resize", debounce(resizeEvent, 100));
@@ -482,6 +492,7 @@ function Canvas() {
     events.addListener("updateCanvas", updateCanvasEvent);
     events.addListener("switchBrush", switchBrushEvent);
     events.addListener("pathStyleModify", pathStyleModifyEvent);
+    events.addListener("exportFile", exportFileEvent);
 
     document.addEventListener("keypress", keypressEvent);
     document.addEventListener("keyup", keyupEvent);
@@ -500,9 +511,11 @@ function Canvas() {
       events.removeAllListeners("updateCanvas");
       events.removeAllListeners("switchBrush");
       events.removeAllListeners("pathStyleModify");
+      events.removeAllListeners("exportFile");
       document.removeEventListener("keypress", keypressEvent);
       document.removeEventListener("keyup", keyupEvent);
 
+      canvas.current.clear();
       canvas.current.dispose();
       canvas.current = null;
     };
