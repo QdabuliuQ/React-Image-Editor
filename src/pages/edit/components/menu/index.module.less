@@ -5,6 +5,19 @@
   border-right: 1px solid #e7e7e7;
   box-sizing: border-box;
   overflow-y: auto;
+  .disable-shape-path {
+    stroke: #cacaca !important;
+  }
+  .disable-status {
+    background-color: #f4f4f4;
+    cursor: not-allowed;
+    color: #cacaca;
+    &:hover {
+      background-color: #f4f4f4 !important;
+      cursor: not-allowed !important;
+      color: #cacaca !important;
+    }
+  }
   .menu-container {
     padding: 10px 0;
     display: grid;
@@ -66,7 +79,7 @@
         &:hover {
           background-color: @color;
           .shape-path {
-            stroke: #fff !important;
+            stroke: #fff;
           }
         }
       }

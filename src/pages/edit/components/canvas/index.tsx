@@ -4,10 +4,12 @@ import { fabric } from "fabric";
 
 import events from "@/bus";
 import ButtonController from "@/components/buttonController";
+import ContextMenu from "@/components/contextMenu";
 import useCanvasHandle from "@/hooks/useCanvasHandle";
+import useElementContextMenu from "@/hooks/useElementContextMenu";
 import initAligningGuidelines from "@/libs/guidelines";
 import { updateActive } from "@/store/actions/active";
-import { addElement } from "@/store/actions/element";
+import { addElement, deleteElementByIdx } from "@/store/actions/element";
 import { Shape } from "@/types/shape";
 import { calcCanvasZoomLevel } from "@/utils/canvas";
 import debounce from "@/utils/debounce";
@@ -17,6 +19,7 @@ import {
   createShapeElement,
   initElementProperty,
 } from "@/utils/element";
+import { exportFileToPng, exportFileToSvg } from "@/utils/exportFile";
 import initCanvas from "@/utils/initCanvas";
 import getRandomID from "@/utils/randomID";
 
@@ -24,7 +27,8 @@ import style from "./index.module.less";
 
 const elementMap = new Map();
 let canvasDom: HTMLCanvasElement;
-let sketch: any;
+let sketch: any,
+  brushType = "";
 function Canvas() {
   const workspaceEl = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
@@ -62,6 +66,8 @@ function Canvas() {
   const deleteElementEvent = (id: string) => {
     canvas.current.remove(elementMap.get(id));
     elementMap.delete(id);
+    dispatch(deleteElementByIdx(id));
+    dispatch(updateActive(""));
   };
 
   interface SvgOptions {
@@ -81,15 +87,20 @@ function Canvas() {
       ? SvgOptions
       : T extends "image"
       ? ImageOptions
-      : never
+      : never,
+    customOptions: { [propName: string]: any } = {}
   ) {
     if (type === "svg") {
-      createShapeElement(options as SvgOptions, (element: any) => {
-        elementMap.set(element._data.id, element);
-        dispatch(addElement(element.toObject()));
-        canvas.current.add(element);
-        canvas.current.setActiveObject(element);
-      });
+      createShapeElement(
+        options as SvgOptions,
+        (element: any) => {
+          elementMap.set(element._data.id, element);
+          dispatch(addElement(element.toObject()));
+          canvas.current.add(element);
+          canvas.current.setActiveObject(element);
+        },
+        customOptions
+      );
     } else if (type === "image") {
       createImageElement(options as ImageOptions, (element: any) => {
         elementMap.set(element._data.id, element);
@@ -98,7 +109,9 @@ function Canvas() {
         canvas.current.setActiveObject(element);
       });
     } else {
-      const element = (createMethods as any)[`create${type}Element`]();
+      const element = (createMethods as any)[`create${type}Element`](
+        customOptions
+      );
       elementMap.set(element._data.id, element);
       dispatch(addElement(element.toObject()));
       canvas.current.add(element);
@@ -174,44 +187,39 @@ function Canvas() {
   }) => {
     const { position, active } = data;
     const element = elementMap.get(active);
-    const eWidth =
-      element._data.type === "image"
-        ? element.width * element.scaleX
-        : element.width;
-    const eHeight =
-      element._data.type === "image"
-        ? element.height * element.scaleY
-        : element.height;
+    const info = element.getBoundingRect();
+    const _width = info.width,
+      _height = info.height;
 
     if (!element) return;
     if (position === "align-left") {
       element.set({
-        left: 0,
+        left: _width / 2,
       });
     } else if (position === "align-center") {
       element.set({
-        left: width / 2 - eWidth / 2,
+        left: width / 2,
       });
     } else if (position === "align-right") {
       element.set({
-        left: width - eWidth,
+        left: width - _width / 2,
       });
     } else if (position === "align-justify") {
       element.set({
-        left: width / 2 - eWidth / 2,
-        top: height / 2 - eHeight / 2,
+        left: width / 2,
+        top: height / 2,
       });
     } else if (position === "align-top") {
       element.set({
-        top: 0,
+        top: _height / 2,
       });
     } else if (position === "align-vertically") {
       element.set({
-        top: height / 2 - eHeight / 2,
+        top: height / 2,
       });
     } else if (position === "align-bottom") {
       element.set({
-        top: height - eHeight,
+        top: height - _height / 2,
       });
     }
     canvas.current.renderAll();
@@ -220,8 +228,6 @@ function Canvas() {
   // 画布更新
   const updateCanvasEvent = (data: { key: string; value: any }) => {
     const { key, value } = data;
-    console.log(data);
-
     sketch.set({
       [key]: value,
     });
@@ -269,11 +275,13 @@ function Canvas() {
   const switchBrushEvent = (type: string, status: boolean) => {
     canvas.current.isDrawingMode = status;
     dispatch(updateActive(status ? type : ""));
+    brushType = type.toLowerCase();
     if (status) {
       // 进入画笔模式
       // 取消激活元素
       canvas.current.discardActiveObject();
       canvas.current["freeDrawingBrush"] = new fabric[type](canvas.current);
+
       canvas.current["freeDrawingBrush"].limitedToCanvasSize = true;
       canvas.current.renderAll();
     } else {
@@ -281,15 +289,21 @@ function Canvas() {
       const objects = canvas.current.getObjects();
 
       // 找到 PencilBrush 绘制的路径元素
-      const pencilBrushPaths = objects.filter(
-        (obj: any) => obj instanceof fabric.Path
+      const brushPaths = objects.filter(
+        (obj: any) =>
+          obj instanceof fabric.Path ||
+          Object.prototype.hasOwnProperty.call(obj, "_objects")
       );
 
       // 修改路径元素的 cornerStyle 属性为 'round'
-      pencilBrushPaths.forEach((path: any) => {
+      brushPaths.forEach((path: any) => {
         if (path._data && path._data.id) return;
         const id = getRandomID(10);
         path.set({
+          left: path.left + path.width / 2,
+          top: path.top + path.height / 2,
+          originX: "center",
+          originY: "center",
           transparentCorners: false,
           hasControls: true,
           hasBorders: true,
@@ -301,7 +315,7 @@ function Canvas() {
           cornerStrokeColor: "#fff",
           _data: {
             id,
-            type: "path",
+            type: brushType,
           },
         });
         initElementProperty(path);
@@ -313,6 +327,7 @@ function Canvas() {
       canvas.current.requestRenderAll();
       canvas.current["freeDrawingBrush"] = null;
     }
+    brushType = status ? brushType : "";
   };
 
   // 修改笔刷样式
@@ -320,6 +335,27 @@ function Canvas() {
     if (!canvas.current["freeDrawingBrush"]) return;
     canvas.current["freeDrawingBrush"][data.key] = data.value;
   };
+
+  // 导出文件
+  const exportFileEvent = (type: string) => {
+    console.log(type);
+
+    if (type === "png") {
+      exportFileToPng(canvas.current);
+    } else if (type === "svg") {
+      exportFileToSvg(canvas.current);
+    }
+  };
+
+  // 获取菜单项
+  const {
+    contextMenuRef,
+    contextMenuData,
+    menuClick,
+    elementInfo,
+    offsetX,
+    offsetY,
+  } = useElementContextMenu();
 
   useEffect(() => {
     if (canvas.current) return;
@@ -375,11 +411,21 @@ function Canvas() {
     //鼠标按下事件
     canvas.current.on("mouse:down", function (this: any, opt: any) {
       const evt = opt.e;
-      if (pressSpace.current) {
+      if (opt.button === 1 && pressSpace.current) {
         this.isDragging = true;
         this.lastPosX = evt.clientX;
         this.lastPosY = evt.clientY;
         canvasDom.style.cursor = "grabbing";
+      } else if (opt.button === 3) {
+        if (!opt.target || !opt.target._data) return;
+        (
+          contextMenuRef.current as unknown as {
+            show: (x: number, y: number) => void;
+          }
+        ).show(evt.clientX, evt.clientY);
+        offsetX.current = evt.clientX;
+        offsetY.current = evt.clientY;
+        (elementInfo as any).current = opt.target;
       }
     });
     //鼠标抬起事件
@@ -409,8 +455,31 @@ function Canvas() {
       }
     });
 
+    canvas.current.on("drop", function (opt: { e: any }) {
+      // 画布元素距离浏览器左侧和顶部的距离
+      const offset = {
+        left: canvas.current.getSelectionElement().getBoundingClientRect().left,
+        top: canvas.current.getSelectionElement().getBoundingClientRect().top,
+      };
+
+      // 鼠标坐标转换成画布的坐标（未经过缩放和平移的坐标）
+      const point = {
+        x: opt.e.x - offset.left,
+        y: opt.e.y - offset.top,
+      };
+
+      // 转换后的坐标，restorePointerVpt 不受视窗变换的影响
+      const pointerVpt = canvas.current.restorePointerVpt(point);
+      const dargInfo = JSON.parse(sessionStorage.getItem("dragInfo") as string);
+      createElementEvent(dargInfo.type, dargInfo.options, {
+        top: pointerVpt.y,
+        left: pointerVpt.x,
+      });
+      sessionStorage.removeItem("dragItem");
+    });
+
     // 添加参考线
-    initAligningGuidelines(canvas.current);
+    // initAligningGuidelines(canvas.current);
 
     resizeEvent();
     window.addEventListener("resize", debounce(resizeEvent, 100));
@@ -423,6 +492,7 @@ function Canvas() {
     events.addListener("updateCanvas", updateCanvasEvent);
     events.addListener("switchBrush", switchBrushEvent);
     events.addListener("pathStyleModify", pathStyleModifyEvent);
+    events.addListener("exportFile", exportFileEvent);
 
     document.addEventListener("keypress", keypressEvent);
     document.addEventListener("keyup", keyupEvent);
@@ -441,9 +511,11 @@ function Canvas() {
       events.removeAllListeners("updateCanvas");
       events.removeAllListeners("switchBrush");
       events.removeAllListeners("pathStyleModify");
+      events.removeAllListeners("exportFile");
       document.removeEventListener("keypress", keypressEvent);
       document.removeEventListener("keyup", keyupEvent);
 
+      canvas.current.clear();
       canvas.current.dispose();
       canvas.current = null;
     };
@@ -462,6 +534,11 @@ function Canvas() {
           clearEvent={_clearEvent}
         />
       </div>
+      <ContextMenu
+        ref={contextMenuRef}
+        menuData={contextMenuData}
+        menuClick={(title: string) => menuClick(title, canvas.current)}
+      />
     </div>
   );
 }

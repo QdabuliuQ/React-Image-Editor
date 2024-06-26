@@ -1,0 +1,23 @@
+.custom-menu-container {
+  padding: 0 5px 8px 5px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  border-bottom: 1px solid #f3f3f3;
+
+  .custom-menu-item {
+    transition: 0.1s all linear;
+    flex: 1;
+    padding: 6px 8px;
+    cursor: pointer;
+    border-radius: 5px;
+    text-align: center;
+
+    :global(.iconfont) {
+      font-size: 15px;
+      color: #595959;
+    }
+    &:hover {
+      background-color: #f5f5f5;
+    }
+  }
+}

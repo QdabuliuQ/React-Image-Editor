@@ -53,12 +53,25 @@ function Menu() {
         icon: "i_pencil",
         mode: "PencilBrush",
       },
+      {
+        title: "喷笔",
+        type: "Spray",
+        icon: "i_spray",
+        mode: "SprayBrush",
+      },
+      {
+        title: "圆形笔刷",
+        type: "Circle",
+        icon: "i_circleBrush",
+        mode: "CircleBrush",
+      },
     ],
     []
   );
 
   const [isShow, setIsShow] = useState(false);
   const clickHandle = (type: string) => {
+    if (reg.test(mode)) return;
     setMode("default");
     if (type === "Picture") {
       setIsShow(true);
@@ -67,6 +80,9 @@ function Menu() {
     }
   };
   const brushClick = (type: string, _mode: string) => {
+    if (mode !== "default" && "Mode" + type !== mode) {
+      return;
+    }
     if ("Mode" + type === mode) {
       setMode("default");
       messageApi.open({
@@ -87,37 +103,35 @@ function Menu() {
   }, []);
 
   // 图形点击回调
-  const shapeClickEvent = useCallback(
-    (shape: {
-      path: string;
-      viewBox: [number, number];
-      outlined?: boolean;
-    }) => {
-      events.emit("createElement", "svg", {
-        svg: `<svg 
-         xmlns="http://www.w3.org/2000/svg"
-          overflow="visible"
-          width="18"
-          height="18">
-          <g transform="scale(${18 / shape.viewBox[0]}, ${
-          18 / shape.viewBox[1]
-        }) translate(0,0) matrix(1,0,0,1,0,0)">
-            <path
-              vectorEffect="non-scaling-stroke"
-              strokeLinecap="butt"
-              strokeMiterlimit="8"
-              fill="${shape.outlined ? "#999" : "transparent"}"
-              stroke="${shape.outlined ? "transparent" : "#999"}"
-              strokeWidth="2"
-              d="${shape.path}"
-            ></path>
-          </g>              
-        </svg>`,
-        shape,
-      });
-    },
-    []
-  );
+  const shapeClickEvent = (shape: {
+    path: string;
+    viewBox: [number, number];
+    outlined?: boolean;
+  }) => {
+    if (reg.test(mode)) return;
+    events.emit("createElement", "svg", {
+      svg: `<svg 
+       xmlns="http://www.w3.org/2000/svg"
+        overflow="visible"
+        width="18"
+        height="18">
+        <g transform="scale(${18 / shape.viewBox[0]}, ${
+        18 / shape.viewBox[1]
+      }) translate(0,0) matrix(1,0,0,1,0,0)">
+          <path
+            vectorEffect="non-scaling-stroke"
+            strokeLinecap="butt"
+            strokeMiterlimit="8"
+            fill="${shape.outlined ? "#999" : "transparent"}"
+            stroke="${shape.outlined ? "transparent" : "#999"}"
+            strokeWidth="2"
+            d="${shape.path}"
+          ></path>
+        </g>              
+      </svg>`,
+      shape,
+    });
+  };
 
   // 图片上传成功回调
   const successEvent = useCallback(
@@ -131,6 +145,17 @@ function Menu() {
     },
     []
   );
+
+  const dragStartEvent = (type: string) => {
+    sessionStorage.setItem(
+      "dragInfo",
+      JSON.stringify({
+        type,
+      })
+    );
+  };
+
+  const reg = useMemo(() => /Mode.*/, []);
 
   return (
     <div className={style["menu-component"]}>
@@ -150,9 +175,13 @@ function Menu() {
       <div className={style["menu-container"]}>
         {menus.map((item: MenuItem) => (
           <div
+            draggable={item.type !== "Picture"}
+            onDragStart={() => dragStartEvent(item.type)}
             onClick={() => clickHandle(item.type)}
             key={item.icon}
-            className={style["menu-item"]}
+            className={`${style["menu-item"]} ${
+              reg.test(mode) ? style["disable-status"] : ""
+            }`}
           >
             <i className={`iconfont ${item.icon} ${style.icon}`}></i>
             <span
@@ -178,7 +207,11 @@ function Menu() {
             onClick={() => brushClick(item.type, item.mode as string)}
             key={item.icon}
             className={`${style["menu-item"]} ${
-              mode === "Mode" + item.type ? style["active-menu-item"] : ""
+              mode === "Mode" + item.type
+                ? style["active-menu-item"]
+                : mode !== "default"
+                ? style["disable-status"]
+                : ""
             }`}
           >
             <i className={`iconfont ${item.icon} ${style.icon}`}></i>
@@ -215,7 +248,9 @@ function Menu() {
                   }) => (
                     <div
                       onClick={() => shapeClickEvent(shape)}
-                      className={style["shape-item"]}
+                      className={`${style["shape-item"]} ${
+                        reg.test(mode) ? style["disable-status"] : ""
+                      }`}
                       key={shape.path}
                     >
                       <svg
@@ -230,7 +265,11 @@ function Menu() {
                           }) translate(0,0) matrix(1,0,0,1,0,0)`}
                         >
                           <path
-                            className={style["shape-path"]}
+                            className={
+                              reg.test(mode)
+                                ? style["disable-shape-path"]
+                                : style["shape-path"]
+                            }
                             vectorEffect="non-scaling-stroke"
                             strokeLinecap="butt"
                             strokeMiterlimit="8"

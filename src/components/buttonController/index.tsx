@@ -1,21 +1,43 @@
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import { Modal, Tooltip } from "antd";
+
+import events from "@/bus";
 
 import { Props } from "./type";
 
 import style from "./index.module.less";
 
 export default memo(function ScaleController(props: Props) {
+  const active = useSelector((state: any) => state.active);
+  const mode = useRef("");
   const [isShow, setIsShow] = useState(false);
   // 打开弹窗
   const clearClick = useCallback(() => {
+    if (mode.current === "PencilBrush") return;
     setIsShow(true);
+  }, []);
+  const closeEvent = useCallback(() => {
+    setIsShow(false);
   }, []);
   // 清空画布
   const confirmEvent = useCallback(() => {
     setIsShow(false);
     props.clearEvent();
   }, []);
+
+  const exportFileToSvg = useCallback(() => {
+    events.emit("exportFile", "svg");
+  }, []);
+  const exportFileToPng = useCallback(() => {
+    events.emit("exportFile", "png");
+  }, []);
+
+  useEffect(() => {
+    mode.current = active;
+  }, [active]);
+
+  const reg = useMemo(() => /.*Brush/, []);
 
   return (
     <div className={style["button-controller"]}>
@@ -44,14 +66,40 @@ export default memo(function ScaleController(props: Props) {
         </div>
       </Tooltip>
       <Tooltip placement="top" title="清空画布">
-        <div onClick={clearClick} className={`${style["button-item"]}`}>
+        <div
+          onClick={clearClick}
+          className={`${style["button-item"]} ${
+            reg.test(active) ? style["disable-button-item"] : ""
+          }`}
+        >
           <i className="iconfont i_clear"></i>
+        </div>
+      </Tooltip>
+      <Tooltip placement="top" title="导出 PNG">
+        <div
+          onClick={exportFileToPng}
+          className={`${style["button-item"]} ${
+            reg.test(active) ? style["disable-button-item"] : ""
+          }`}
+        >
+          <i className="iconfont i_png"></i>
+        </div>
+      </Tooltip>
+      <Tooltip placement="top" title="导出 SVG">
+        <div
+          onClick={exportFileToSvg}
+          className={`${style["button-item"]} ${
+            reg.test(active) ? style["disable-button-item"] : ""
+          }`}
+        >
+          <i className="iconfont i_svg"></i>
         </div>
       </Tooltip>
       <Modal
         title="提示"
         centered
         open={isShow}
+        onCancel={closeEvent}
         onOk={confirmEvent}
         okText="确定"
         cancelText="取消"
