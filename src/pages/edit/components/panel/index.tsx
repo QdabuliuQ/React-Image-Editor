@@ -18,7 +18,7 @@ import SplitLine from "@/components/splitLine";
 import SprayPanel from "@/components/sprayPanel";
 import Switch from "@/components/switch";
 import { useActiveIdx } from "@/hooks/useActiveIdx";
-import { updateElementByIdx } from "@/store/actions/element";
+import { updateElementByIdx } from "@/store/modules/element/action";
 import { getConfig } from "@/utils/getConfig";
 
 import style from "./index.module.less";

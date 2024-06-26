@@ -8,8 +8,8 @@ import ContextMenu from "@/components/contextMenu";
 import useCanvasHandle from "@/hooks/useCanvasHandle";
 import useElementContextMenu from "@/hooks/useElementContextMenu";
 import initAligningGuidelines from "@/libs/guidelines";
-import { updateActive } from "@/store/actions/active";
-import { addElement, deleteElementByIdx } from "@/store/actions/element";
+import { updateActive } from "@/store/modules/active/action";
+import { addElement, deleteElementByIdx } from "@/store/modules/element/action";
 import { Shape } from "@/types/shape";
 import { calcCanvasZoomLevel } from "@/utils/canvas";
 import debounce from "@/utils/debounce";
@@ -156,6 +156,8 @@ function Canvas() {
 
     canvas.current.setWidth(width);
     canvas.current.setHeight(height);
+
+    scaleInitEvent();
   };
 
   // 空格按下
@@ -237,20 +239,21 @@ function Canvas() {
     } else if (key === "height") {
       height = value;
     }
+    const zoomLevel = calcCanvasZoomLevel(
+      {
+        width: canvas.current.width,
+        height: canvas.current.height,
+      },
+      {
+        width,
+        height,
+      }
+    );
     if (key === "width" || key === "height") {
-      const zoomLevel = calcCanvasZoomLevel(
-        {
-          width: canvas.current.width,
-          height: canvas.current.height,
-        },
-        {
-          width,
-          height,
-        }
-      );
       initCanvas(canvas.current, sketch, zoomLevel);
       setZoom(zoomLevel);
     } else {
+      initCanvas(canvas.current, sketch, zoomLevel);
       canvas.current.renderAll();
     }
   };

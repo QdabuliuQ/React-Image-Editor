@@ -4,8 +4,8 @@ import { useDispatch } from "react-redux";
 import events from "@/bus";
 import ContextMenuPosition from "@/components/contextMenuPosition";
 import ContextMenuZIndex from "@/components/contextMenuZIndex";
-import { updateActive } from "@/store/actions/active";
-import { addElement } from "@/store/actions/element";
+import { updateActive } from "@/store/modules/active/action";
+import { addElement } from "@/store/modules/element/action";
 import { initElementProperty } from "@/utils/element";
 import getRandomID from "@/utils/randomID";
 

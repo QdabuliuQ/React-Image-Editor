@@ -1,15 +1,18 @@
 // 导出 png 格式的图片
 export function exportFileToPng(canvas: any) {
-  console.log(canvas);
 
-  const pngUrl = canvas.toDataURL({
+  canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+  const dataUrl = canvas.toDataURL({
     format: "png",
     quality: 1,
+    width: 500,
+    height: 600,
   });
-  const a = document.createElement("a");
-  a.href = pngUrl;
-  a.download = Date.now() + ".png";
-  a.click();
+
+  const a = document.createElement("a")
+  a.href = dataUrl
+  a.download = Date.now() + '.png'
+  a.click()
 }
 
 // 导出 svg 格式的图片

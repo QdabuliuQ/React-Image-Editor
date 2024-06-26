@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Select } from "antd";
 
 import events from "@/bus";
-import { updateElementByIdx } from "@/store/actions/element";
+import { updateElementByIdx } from "@/store/modules/element/action";
 import debounce from "@/utils/debounce";
 
 import { Props } from "./type";

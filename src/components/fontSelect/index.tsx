@@ -5,7 +5,7 @@ import FontFaceObserver from "fontfaceobserver";
 
 import events from "@/bus";
 import fontFamily from "@/libs/fontFamily";
-import { updateElementByIdx } from "@/store/actions/element";
+import { updateElementByIdx } from "@/store/modules/element/action";
 
 import OptionItem from "../optionItem";
 
