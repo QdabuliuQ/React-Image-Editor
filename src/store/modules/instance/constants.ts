@@ -1,0 +1,1 @@
+export const INIT_INSTANCE = "INIT_INSTANCE";

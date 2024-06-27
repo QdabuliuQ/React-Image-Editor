@@ -19,6 +19,10 @@ export default function initCanvas(
   viewportTransform[5] =
     canvas.height / 2 - sketchCenter.y * viewportTransform[3];
   canvas.setViewportTransform(viewportTransform);
+  sessionStorage.setItem(
+    "viewportTransform",
+    JSON.stringify(viewportTransform)
+  );
   canvas.requestRenderAll();
 
   sketch.clone((cloned: any) => {

@@ -6,29 +6,39 @@ import {
   SwitchProps,
 } from "antd";
 
+enum ControllerType {
+  colorPicker = "colorPicker",
+  inputNumber = "inputNumber",
+  select = "select",
+  switch = "switch",
+  slider = "slider",
+}
+
 interface CommonConfig<T extends string> {
   title: string;
   name: string;
   type: T;
 }
 
-export interface ColorPickerConfig extends CommonConfig<"colorPicker"> {
+export interface ColorPickerConfig
+  extends CommonConfig<ControllerType.colorPicker> {
   property?: ColorPickerProps;
 }
 
-export interface InputNumberConfig extends CommonConfig<"inputNumber"> {
+export interface InputNumberConfig
+  extends CommonConfig<ControllerType.inputNumber> {
   property?: InputNumberProps;
 }
 
-export interface SelectConfig extends CommonConfig<"select"> {
+export interface SelectConfig extends CommonConfig<ControllerType.select> {
   property?: SelectProps;
 }
 
-export interface SwitchConfig extends CommonConfig<"switch"> {
+export interface SwitchConfig extends CommonConfig<ControllerType.switch> {
   property?: SwitchProps;
 }
 
-export interface SliderConfig extends CommonConfig<"slider"> {
+export interface SliderConfig extends CommonConfig<ControllerType.slider> {
   property?: SliderSingleProps;
 }
 
