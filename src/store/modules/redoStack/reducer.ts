@@ -1,6 +1,7 @@
 import type { Action } from "@/types/reduxType";
 
 import {
+  CLEAR_OPERATION_REDOSTACK,
   POP_OPERATION_REDOSTACK,
   PUSH_OPERATION_REDOSTACK,
   SHIFT_OPERATION_REDOSTACK,
@@ -23,6 +24,8 @@ const redoStackReducer = (
   } else if (type === POP_OPERATION_REDOSTACK) {
     state.pop();
     return [...state];
+  } else if (type === CLEAR_OPERATION_REDOSTACK) {
+    return []
   }
   return state;
 };
