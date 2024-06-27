@@ -51,7 +51,7 @@ function Canvas() {
     [zoom]
   );
   const _scaleUpEvent = useCallback(() => scaleUpEvent(canvas.current), [zoom]);
-  const _clearEvent = useCallback(() => clearEvent(window.elementMap), []);
+  const _clearEvent = useCallback(() => clearEvent(), []);
   const scaleInitEvent = useCallback(() => {
     const zoomLevel = calcCanvasZoomLevel(
       {
