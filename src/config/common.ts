@@ -1,37 +1,39 @@
+import { ControllerType } from "@/types/config";
+
 export default [
   {
     title: "水平翻转",
-    type: "switch",
+    type: ControllerType.switch,
     name: "flipX",
   },
   {
     title: "垂直翻转",
-    type: "switch",
+    type: ControllerType.switch,
     name: "flipY",
   },
   {
     title: "边框颜色",
-    type: "colorPicker",
+    type: ControllerType.colorPicker,
     name: "stroke",
   },
   {
     title: "边框宽度",
-    type: "inputNumber",
+    type: ControllerType.inputNumber,
     name: "strokeWidth",
   },
   {
     title: "倾斜X",
-    type: "inputNumber",
+    type: ControllerType.inputNumber,
     name: "skewX",
   },
   {
     title: "倾斜Y",
-    type: "inputNumber",
+    type: ControllerType.inputNumber,
     name: "skewY",
   },
   {
     title: "透明度",
-    type: "slider",
+    type: ControllerType.slider,
     property: {
       max: 1,
       min: 0,

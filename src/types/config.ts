@@ -6,7 +6,7 @@ import {
   SwitchProps,
 } from "antd";
 
-enum ControllerType {
+export enum ControllerType {
   colorPicker = "colorPicker",
   inputNumber = "inputNumber",
   select = "select",
@@ -14,7 +14,7 @@ enum ControllerType {
   slider = "slider",
 }
 
-interface CommonConfig<T extends string> {
+interface CommonConfig<T> {
   title: string;
   name: string;
   type: T;

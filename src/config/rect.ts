@@ -1,4 +1,4 @@
-import { Config } from "@/types/config";
+import { Config, ControllerType } from "@/types/config";
 
 import common from "./common";
 
@@ -6,12 +6,12 @@ const config: Array<Config> = [
   ...(common as Array<Config>),
   {
     title: "颜色",
-    type: "colorPicker",
+    type: ControllerType.colorPicker,
     name: "fill",
   },
   {
     title: "圆角X半径",
-    type: "inputNumber",
+    type: ControllerType.inputNumber,
     property: {
       min: 0,
       max: 500,
@@ -20,7 +20,7 @@ const config: Array<Config> = [
   },
   {
     title: "圆角Y半径",
-    type: "inputNumber",
+    type: ControllerType.inputNumber,
     property: {
       min: 0,
       max: 500,
