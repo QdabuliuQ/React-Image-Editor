@@ -1,4 +1,5 @@
 import {
+  CLEAR_OPERATION_UNDOSTACK,
   POP_OPERATION_UNDOSTACK,
   PUSH_OPERATION_UNDOSTACK,
   SHIFT_OPERATION_UNDOSTACK,
@@ -27,4 +28,12 @@ export function popOperationUndoStack() {
     type: POP_OPERATION_UNDOSTACK,
     payload: null,
   };
+}
+
+// 清空记录
+export function clearOperationUndoStack() {
+  return {
+    type: CLEAR_OPERATION_UNDOSTACK,
+    payload: null
+  }
 }

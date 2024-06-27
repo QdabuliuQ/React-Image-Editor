@@ -3,6 +3,8 @@ import { useDispatch } from "react-redux";
 
 import { updateActive } from "@/store/modules/active/action";
 import { initElement } from "@/store/modules/element/action";
+import { clearOperationRedoStack } from "@/store/modules/redoStack/action";
+import { clearOperationUndoStack } from "@/store/modules/undoStack/actions";
 
 export default function useCanvasHandle() {
   const [zoom, setZoom] = useState(0);
@@ -37,13 +39,16 @@ export default function useCanvasHandle() {
   };
 
   // 清空画布
-  const clearEvent = (elementMap: Map<string, any>) => {
-    for (const [, value] of elementMap) {
+  // const clearEvent = (elementMap: Map<string, any>) => {
+  const clearEvent = () => {
+    for (const [, value] of window.elementMap) {
       window._instance.remove(value);
     }
     dispatch(updateActive(""));
     dispatch(initElement([]));
-    elementMap.clear();
+    dispatch(clearOperationRedoStack())
+    dispatch(clearOperationUndoStack())
+    window.elementMap.clear();
     window._instance.renderAll();
   };
 

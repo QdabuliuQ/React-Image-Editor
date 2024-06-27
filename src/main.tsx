@@ -11,6 +11,14 @@ import "./index.less";
 import "@/assets/style/common.less";
 import "@/assets/icon/index.css";
 
+sessionStorage.setItem(
+  "canvasInfo",
+  JSON.stringify({
+    width: 500,
+    height: 600,
+  })
+);
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter basename="/react-image-editor">
