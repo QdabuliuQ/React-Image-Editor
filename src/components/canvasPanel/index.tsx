@@ -17,6 +17,15 @@ export default memo(function CanvasPanel() {
 
   const inputHandle = (key: string) => {
     return (e: number) => {
+      sessionStorage.setItem(
+        "canvasInfo",
+        JSON.stringify({
+          [key]: e,
+          [key === "width" ? "height" : "width"]: JSON.parse(
+            sessionStorage.getItem("canvasInfo") as string
+          )[key === "width" ? "height" : "width"],
+        })
+      );
       dispatch(
         updateCanvas({
           key,

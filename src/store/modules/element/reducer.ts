@@ -1,11 +1,12 @@
+import type { Element } from "@/types/element";
+import type { Action } from "@/types/reduxType";
+
 import {
   ADD_ELEMENT,
   DELETE_ELEMENT_BY_IDX,
   INIT_ELEMENT,
   UPDATE_ELEMENT_BY_IDX,
 } from "./constant";
-import { Element } from "@/types/element";
-import { Action } from "@/types/reduxType";
 
 const initialValue: Array<Element> = [];
 

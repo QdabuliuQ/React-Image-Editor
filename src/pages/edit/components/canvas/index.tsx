@@ -21,16 +21,20 @@ import {
 } from "@/utils/element";
 import { exportFileToPng, exportFileToSvg } from "@/utils/exportFile";
 import initCanvas from "@/utils/initCanvas";
+import { saveOperation } from "@/utils/opeHistory";
 import getRandomID from "@/utils/randomID";
 
 import style from "./index.module.less";
+
+let { width, height } = JSON.parse(
+  sessionStorage.getItem("canvasInfo") as string
+);
 
 const elementMap = new Map();
 let canvasDom: HTMLCanvasElement;
 let sketch: any,
   brushType = "";
 function Canvas() {
-  const workspaceEl = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
   const pressSpace = useRef(false);
 
@@ -43,11 +47,10 @@ function Canvas() {
     [zoom]
   );
   const _scaleUpEvent = useCallback(() => scaleUpEvent(canvas.current), [zoom]);
-  const _clearEvent = useCallback(
-    () => clearEvent(canvas.current, elementMap),
-    []
-  );
+  const _clearEvent = useCallback(() => clearEvent(elementMap), []);
   const scaleInitEvent = useCallback(() => {
+    console.log(canvas.current.width, canvas.current.height, width, height);
+
     const zoomLevel = calcCanvasZoomLevel(
       {
         width: canvas.current.width,
@@ -68,6 +71,7 @@ function Canvas() {
     elementMap.delete(id);
     dispatch(deleteElementByIdx(id));
     dispatch(updateActive(""));
+    saveOperation();
   };
 
   interface SvgOptions {
@@ -179,9 +183,6 @@ function Canvas() {
     }
   };
 
-  let width = 500,
-    height = 600;
-
   // 元素位置修改
   const updateElementPositionEvent = (data: {
     position: string;
@@ -253,9 +254,16 @@ function Canvas() {
       initCanvas(canvas.current, sketch, zoomLevel);
       setZoom(zoomLevel);
     } else {
-      initCanvas(canvas.current, sketch, zoomLevel);
       canvas.current.renderAll();
     }
+    scaleInitEvent();
+    sessionStorage.setItem(
+      "canvasInfo",
+      JSON.stringify({
+        width,
+        height,
+      })
+    );
   };
 
   // 缩放初始化
@@ -289,45 +297,6 @@ function Canvas() {
       canvas.current.renderAll();
     } else {
       // 退出画笔模式
-      const objects = canvas.current.getObjects();
-
-      // 找到 PencilBrush 绘制的路径元素
-      const brushPaths = objects.filter(
-        (obj: any) =>
-          obj instanceof fabric.Path ||
-          Object.prototype.hasOwnProperty.call(obj, "_objects")
-      );
-
-      // 修改路径元素的 cornerStyle 属性为 'round'
-      brushPaths.forEach((path: any) => {
-        if (path._data && path._data.id) return;
-        const id = getRandomID(10);
-        path.set({
-          left: path.left + path.width / 2,
-          top: path.top + path.height / 2,
-          originX: "center",
-          originY: "center",
-          transparentCorners: false,
-          hasControls: true,
-          hasBorders: true,
-          visible: true,
-          cornerStyle: "circle",
-          cornerSize: 15,
-          borderColor: "#1677ff",
-          cornerColor: "#1677ff",
-          cornerStrokeColor: "#fff",
-          _data: {
-            id,
-            type: brushType,
-          },
-        });
-        initElementProperty(path);
-        dispatch(addElement(path.toObject()));
-        elementMap.set(id, path);
-      });
-
-      // 通知 Canvas 更新
-      canvas.current.requestRenderAll();
       canvas.current["freeDrawingBrush"] = null;
     }
     brushType = status ? brushType : "";
@@ -341,8 +310,6 @@ function Canvas() {
 
   // 导出文件
   const exportFileEvent = (type: string) => {
-    console.log(type);
-
     if (type === "png") {
       exportFileToPng(canvas.current);
     } else if (type === "svg") {
@@ -360,6 +327,30 @@ function Canvas() {
     offsetY,
   } = useElementContextMenu();
 
+  const newCanvasEvent = (data: {
+    width: number;
+    height: number;
+    color: string;
+  }) => {
+    sessionStorage.setItem(
+      "canvasInfo",
+      JSON.stringify({
+        width: data.width,
+        height: data.height,
+      })
+    );
+    width = data.width;
+    height = data.height;
+    window._instance.set({
+      width,
+      height,
+      color: data.color,
+    });
+
+    _clearEvent();
+    scaleInitEvent();
+  };
+
   useEffect(() => {
     if (canvas.current) return;
     canvas.current = new fabric.Canvas("c", {
@@ -370,6 +361,7 @@ function Canvas() {
       transparentCorners: false,
       allowTouchScrolling: true,
     });
+    (window as any)._instance = canvas.current;
 
     canvasDom = document.getElementsByClassName(
       "upper-canvas"
@@ -390,6 +382,19 @@ function Canvas() {
     canvas.current.add(sketch);
 
     initScale();
+
+    // canvas.current.on("object:modified", () => {
+    //   saveOperation();
+    // });
+    // canvas.current.on("object:added", () => {
+    //   if (/.*Brush/.test(active)) return;
+    //   if (
+    //     sessionStorage.getItem("isOpe") === "false" ||
+    //     !sessionStorage.getItem("isOpe")
+    //   ) {
+    //     saveOperation();
+    //   }
+    // });
 
     // 画布缩放
     canvas.current.on("mouse:wheel", (opt: any) => {
@@ -414,6 +419,7 @@ function Canvas() {
     //鼠标按下事件
     canvas.current.on("mouse:down", function (this: any, opt: any) {
       const evt = opt.e;
+
       if (opt.button === 1 && pressSpace.current) {
         this.isDragging = true;
         this.lastPosX = evt.clientX;
@@ -482,7 +488,7 @@ function Canvas() {
     });
 
     // 添加参考线
-    // initAligningGuidelines(canvas.current);
+    initAligningGuidelines(canvas.current);
 
     resizeEvent();
     window.addEventListener("resize", debounce(resizeEvent, 100));
@@ -496,6 +502,7 @@ function Canvas() {
     events.addListener("switchBrush", switchBrushEvent);
     events.addListener("pathStyleModify", pathStyleModifyEvent);
     events.addListener("exportFile", exportFileEvent);
+    events.addListener("newCanvas", newCanvasEvent);
 
     document.addEventListener("keypress", keypressEvent);
     document.addEventListener("keyup", keyupEvent);
@@ -515,6 +522,7 @@ function Canvas() {
       events.removeAllListeners("switchBrush");
       events.removeAllListeners("pathStyleModify");
       events.removeAllListeners("exportFile");
+      events.removeAllListeners("newCanvas");
       document.removeEventListener("keypress", keypressEvent);
       document.removeEventListener("keyup", keyupEvent);
 
@@ -524,9 +532,65 @@ function Canvas() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!canvas.current) return;
+    canvas.current.on("object:modified", () => {
+      saveOperation();
+    });
+    canvas.current.on("object:added", () => {
+      // 退出画笔模式
+      const objects = canvas.current.getObjects();
+
+      // 找到 PencilBrush 绘制的路径元素
+      const brushPaths = objects.filter(
+        (obj: any) =>
+          obj instanceof fabric.Path ||
+          Object.prototype.hasOwnProperty.call(obj, "_objects")
+      );
+
+      // 修改路径元素的 cornerStyle 属性为 'round'
+      brushPaths.forEach((path: any) => {
+        if (path._data && path._data.id) return;
+        const id = getRandomID(10);
+        path.set({
+          left: path.left + path.width / 2,
+          top: path.top + path.height / 2,
+          originX: "center",
+          originY: "center",
+          transparentCorners: false,
+          hasControls: true,
+          hasBorders: true,
+          visible: true,
+          cornerStyle: "circle",
+          cornerSize: 15,
+          borderColor: "#1677ff",
+          cornerColor: "#1677ff",
+          cornerStrokeColor: "#fff",
+          _data: {
+            id,
+            type: brushType,
+          },
+        });
+        initElementProperty(path);
+        dispatch(addElement(path.toObject()));
+        elementMap.set(id, path);
+      });
+
+      // 通知 Canvas 更新
+      canvas.current.requestRenderAll();
+
+      if (
+        sessionStorage.getItem("isOpe") === "false" ||
+        !sessionStorage.getItem("isOpe")
+      ) {
+        saveOperation();
+      }
+    });
+  }, []);
+
   return (
     <div id="canvas-component" className={style["canvas-component"]}>
-      <div ref={workspaceEl} className={style["canvas-main"]}>
+      <div className={style["canvas-main"]}>
         <canvas id="c"></canvas>
       </div>
       <div className={style["canvas-info"]}>

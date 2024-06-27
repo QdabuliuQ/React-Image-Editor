@@ -1,6 +1,6 @@
 import { INIT_CANVAS, UPDATE_CANVAS } from "./constant";
 import { Canvas } from "@/types/canvas";
-import { Action } from "@/types/reduxType";
+import type { Action } from "@/types/reduxType";
 
 const initialValue: Canvas = {
   width: 500,

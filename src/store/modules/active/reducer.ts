@@ -1,5 +1,5 @@
 import { UPDATE_ACTIVE } from "./constant";
-import { Action } from "@/types/reduxType";
+import type { Action } from "@/types/reduxType";
 
 const initialValue: string = "";
 

@@ -13,9 +13,6 @@ img.src = deleteIcon;
 
 function deleteObject(_: any, transform: any) {
   const target = transform.target;
-  const canvas = target.canvas;
-  canvas.remove(target);
-  canvas.requestRenderAll();
   events.emit("deleteElement", target._data.id);
 }
 
@@ -49,7 +46,9 @@ const options = {
   cornerStrokeColor: "#fff",
 };
 
-function _toObject(toObject: any) {
+export const elementOptions = options;
+
+export function _toObject(toObject: any) {
   return (function (toObject) {
     return function (this: any) {
       return fabric.util.object.extend(toObject.call(this), {

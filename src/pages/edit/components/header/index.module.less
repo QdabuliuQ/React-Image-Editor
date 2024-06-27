@@ -1,0 +1,49 @@
+.edit-header {
+  padding: 0 20px;
+  height: 50px;
+  box-sizing: border-box;
+  border-bottom: 1px solid #e7e7e7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  :global(.ant-btn) {
+    &:not(:last-child) {
+      margin-right: 20px;
+    }
+  }
+  .header-item {
+    flex: 1;
+  }
+  .header-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    :global(.iconfont) {
+      font-size: 20px;
+    }
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+}
+
+.canvas-form {
+  display: flex;
+  align-items: center;
+
+  .form-item {
+    flex: 1;
+    margin: 15px 0;
+    display: flex;
+    align-items: center;
+  }
+}
+.tip {
+  text-align: right;
+  color: red;
+  margin-top: 0;
+  margin-bottom: 15px;
+}

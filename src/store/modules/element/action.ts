@@ -1,10 +1,11 @@
+import type { Element } from "@/types/element";
+
 import {
   ADD_ELEMENT,
   DELETE_ELEMENT_BY_IDX,
   INIT_ELEMENT,
   UPDATE_ELEMENT_BY_IDX,
 } from "./constant";
-import { Element } from "@/types/element";
 
 // 初始化元素
 export function initElement(payload: Array<Element>) {
