@@ -21,7 +21,8 @@ import {
 } from "@/utils/element";
 import { exportFileToPng, exportFileToSvg } from "@/utils/exportFile";
 import initCanvas from "@/utils/initCanvas";
-import { saveOperation } from "@/utils/opeHistory";
+// import { saveOperation } from "@/utils/opeHistory";
+import useOpeHistory from "@/hooks/useOpeHistory";
 import getRandomID from "@/utils/randomID";
 
 import style from "./index.module.less";
@@ -30,11 +31,14 @@ let { width, height } = JSON.parse(
   sessionStorage.getItem("canvasInfo") as string
 );
 
-const elementMap = new Map();
+// const window.elementMap = new Map();
+window.elementMap = new Map();
+
 let canvasDom: HTMLCanvasElement;
 let sketch: any,
   brushType = "";
 function Canvas() {
+  const { saveOperation } = useOpeHistory();
   const dispatch = useDispatch();
   const pressSpace = useRef(false);
 
@@ -47,10 +51,8 @@ function Canvas() {
     [zoom]
   );
   const _scaleUpEvent = useCallback(() => scaleUpEvent(canvas.current), [zoom]);
-  const _clearEvent = useCallback(() => clearEvent(elementMap), []);
+  const _clearEvent = useCallback(() => clearEvent(window.elementMap), []);
   const scaleInitEvent = useCallback(() => {
-    console.log(canvas.current.width, canvas.current.height, width, height);
-
     const zoomLevel = calcCanvasZoomLevel(
       {
         width: canvas.current.width,
@@ -67,8 +69,8 @@ function Canvas() {
 
   // 删除元素
   const deleteElementEvent = (id: string) => {
-    canvas.current.remove(elementMap.get(id));
-    elementMap.delete(id);
+    canvas.current.remove(window.elementMap.get(id));
+    window.elementMap.delete(id);
     dispatch(deleteElementByIdx(id));
     dispatch(updateActive(""));
     saveOperation();
@@ -98,7 +100,7 @@ function Canvas() {
       createShapeElement(
         options as SvgOptions,
         (element: any) => {
-          elementMap.set(element._data.id, element);
+          window.elementMap.set(element._data.id, element);
           dispatch(addElement(element.toObject()));
           canvas.current.add(element);
           canvas.current.setActiveObject(element);
@@ -107,7 +109,7 @@ function Canvas() {
       );
     } else if (type === "image") {
       createImageElement(options as ImageOptions, (element: any) => {
-        elementMap.set(element._data.id, element);
+        window.elementMap.set(element._data.id, element);
         dispatch(addElement(element.toObject()));
         canvas.current.add(element);
         canvas.current.setActiveObject(element);
@@ -116,7 +118,7 @@ function Canvas() {
       const element = (createMethods as any)[`create${type}Element`](
         customOptions
       );
-      elementMap.set(element._data.id, element);
+      window.elementMap.set(element._data.id, element);
       dispatch(addElement(element.toObject()));
       canvas.current.add(element);
       canvas.current.setActiveObject(element);
@@ -135,8 +137,8 @@ function Canvas() {
     active: string;
     applyFilters?: boolean;
   }) => {
-    if (elementMap.has(data.active)) {
-      const el = elementMap.get(data.active);
+    if (window.elementMap.has(data.active)) {
+      const el = window.elementMap.get(data.active);
       el.set({
         [data.key]: data.value,
       });
@@ -147,8 +149,8 @@ function Canvas() {
 
   // 元素层级状态改变
   const updateElementLayoutEvent = (data: { type: string; active: string }) => {
-    if (elementMap.has(data.active)) {
-      canvas.current[data.type](elementMap.get(data.active));
+    if (window.elementMap.has(data.active)) {
+      canvas.current[data.type](window.elementMap.get(data.active));
     }
   };
 
@@ -189,7 +191,7 @@ function Canvas() {
     active: string;
   }) => {
     const { position, active } = data;
-    const element = elementMap.get(active);
+    const element = window.elementMap.get(active);
     const info = element.getBoundingRect();
     const _width = info.width,
       _height = info.height;
@@ -573,7 +575,7 @@ function Canvas() {
         });
         initElementProperty(path);
         dispatch(addElement(path.toObject()));
-        elementMap.set(id, path);
+        window.elementMap.set(id, path);
       });
 
       // 通知 Canvas 更新

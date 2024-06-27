@@ -1,43 +1,44 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Button, ColorPicker, InputNumber, Modal, Tooltip } from "antd";
 
 import events from "@/bus";
 import debounce from "@/utils/debounce";
-import { getNextOperation, getPrevOperation } from "@/utils/opeHistory";
+// import { getNextOperation, getPrevOperation } from "@/utils/opeHistory";
 
 import style from "./index.module.less";
+import useOpeHistory from "@/hooks/useOpeHistory";
+import { clearOperationRedoStack } from "@/store/modules/redoStack/action";
+import { clearOperationUndoStack } from "@/store/modules/undoStack/actions";
 
 export default memo(function Header() {
+  const dispatch = useDispatch();
+  const { getNextOperation, getPrevOperation, redoStack, undoStack } =
+    useOpeHistory();
+
   const active = useSelector((state: any) => state.active);
   const mode = useRef("");
-  const [disable1, setDisable1] = useState(window.undoStack.length === 0);
-  const [disable2, setDisable2] = useState(window.redoStack.length === 0);
 
   const prevClickEvent = useCallback(() => {
     sessionStorage.setItem("isOpe", "true");
     getPrevOperation();
-    setDisable1(window.undoStack.length === 0);
-    setDisable2(window.redoStack.length === 0);
     setTimeout(() => {
       sessionStorage.removeItem("isOpe");
     }, 100);
-  }, []);
+  }, [undoStack, redoStack]);
   const nextClickEvent = useCallback(() => {
     sessionStorage.setItem("isOpe", "true");
     getNextOperation();
-    setDisable1(window.undoStack.length === 0);
-    setDisable2(window.redoStack.length === 0);
     setTimeout(() => {
       sessionStorage.removeItem("isOpe");
     }, 100);
-  }, []);
+  }, [undoStack, redoStack]);
 
-  const elementChange = () => {
-    if (disable1) {
-      setDisable1(false);
-    }
-  };
+  // const elementChange = () => {
+  //   if (disable1) {
+  //     setDisable1(false);
+  //   }
+  // };
 
   const [open, setOpen] = useState(false);
   const newCanvasEvent = useCallback(() => {
@@ -56,10 +57,9 @@ export default memo(function Header() {
       key: "fill",
       value: color.current,
     });
-    setDisable1(true);
-    setDisable2(true);
-    window.undoStack.length = 0;
-    window.redoStack.length = 0;
+
+    dispatch(clearOperationRedoStack());
+    dispatch(clearOperationUndoStack());
   }, []);
   const handleCancel = useCallback(() => {
     setOpen(false);
@@ -77,12 +77,12 @@ export default memo(function Header() {
     []
   );
 
-  useEffect(() => {
-    events.on("elementChange", elementChange);
-    return () => {
-      events.removeAllListeners("elementChange");
-    };
-  }, []);
+  // useEffect(() => {
+  //   events.on("elementChange", elementChange);
+  //   return () => {
+  //     events.removeAllListeners("elementChange");
+  //   };
+  // }, []);
   useEffect(() => {
     mode.current = active;
   }, [active]);
@@ -135,7 +135,7 @@ export default memo(function Header() {
             onClick={prevClickEvent}
             type="text"
             shape="circle"
-            disabled={reg.test(active) || disable1}
+            disabled={undoStack.length === 0}
             icon={<i className="iconfont i_pre"></i>}
           />
         </Tooltip>
@@ -144,7 +144,7 @@ export default memo(function Header() {
             onClick={nextClickEvent}
             type="text"
             shape="circle"
-            disabled={reg.test(active) || disable2}
+            disabled={redoStack.length === 0}
             icon={<i className="iconfont i_next"></i>}
           />
         </Tooltip>
