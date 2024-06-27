@@ -6,6 +6,7 @@ import {
   SwitchProps,
 } from "antd";
 
+// 枚举类型
 export enum ControllerType {
   colorPicker = "colorPicker",
   inputNumber = "inputNumber",
