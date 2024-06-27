@@ -1,0 +1,1 @@
+import{c as t,C as e}from"./common-DzlWlZ_w.js";const m=[...t,{title:"颜色",type:e.colorPicker,name:"fill"},{title:"圆角X半径",type:e.inputNumber,property:{min:0,max:500},name:"rx"},{title:"圆角Y半径",type:e.inputNumber,property:{min:0,max:500},name:"ry"}];export{m as default};

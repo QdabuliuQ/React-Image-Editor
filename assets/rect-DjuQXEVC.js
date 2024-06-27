@@ -1,1 +1,0 @@
-import t from"./common-Drfn_Ai_.js";const m=[...t,{title:"颜色",type:"colorPicker",name:"fill"},{title:"圆角X半径",type:"inputNumber",property:{min:0,max:500},name:"rx"},{title:"圆角Y半径",type:"inputNumber",property:{min:0,max:500},name:"ry"}];export{m as default};
