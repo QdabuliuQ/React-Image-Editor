@@ -85,6 +85,16 @@ export default memo(function ScaleController(props: Props) {
           <i className="iconfont i_png"></i>
         </div>
       </Tooltip>
+      <Tooltip placement="top" title="导出 JPG">
+        <div
+          onClick={exportFileToPng}
+          className={`${style["button-item"]} ${
+            reg.test(active) ? style["disable-button-item"] : ""
+          }`}
+        >
+          <i className="iconfont i_jpg"></i>
+        </div>
+      </Tooltip>
       <Tooltip placement="top" title="导出 SVG">
         <div
           onClick={exportFileToSvg}
@@ -93,6 +103,16 @@ export default memo(function ScaleController(props: Props) {
           }`}
         >
           <i className="iconfont i_svg"></i>
+        </div>
+      </Tooltip>
+      <Tooltip placement="top" title="导出 JSON">
+        <div
+          onClick={exportFileToSvg}
+          className={`${style["button-item"]} ${
+            reg.test(active) ? style["disable-button-item"] : ""
+          }`}
+        >
+          <i className="iconfont i_json"></i>
         </div>
       </Tooltip>
       <Modal

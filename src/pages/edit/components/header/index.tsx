@@ -3,13 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { Button, ColorPicker, InputNumber, Modal, Tooltip } from "antd";
 
 import events from "@/bus";
-import debounce from "@/utils/debounce";
-// import { getNextOperation, getPrevOperation } from "@/utils/opeHistory";
-
-import style from "./index.module.less";
 import useOpeHistory from "@/hooks/useOpeHistory";
 import { clearOperationRedoStack } from "@/store/modules/redoStack/action";
 import { clearOperationUndoStack } from "@/store/modules/undoStack/actions";
+import debounce from "@/utils/debounce";
+
+import style from "./index.module.less";
 
 export default memo(function Header() {
   const dispatch = useDispatch();
@@ -19,6 +18,7 @@ export default memo(function Header() {
   const active = useSelector((state: any) => state.active);
   const mode = useRef("");
 
+  // 撤销回调
   const prevClickEvent = useCallback(() => {
     sessionStorage.setItem("isOpe", "true");
     getPrevOperation();
@@ -26,6 +26,8 @@ export default memo(function Header() {
       sessionStorage.removeItem("isOpe");
     }, 100);
   }, [undoStack, redoStack]);
+
+  // 重做回调
   const nextClickEvent = useCallback(() => {
     sessionStorage.setItem("isOpe", "true");
     getNextOperation();
@@ -34,13 +36,10 @@ export default memo(function Header() {
     }, 100);
   }, [undoStack, redoStack]);
 
-  // const elementChange = () => {
-  //   if (disable1) {
-  //     setDisable1(false);
-  //   }
-  // };
-
+  // 弹窗变量
   const [open, setOpen] = useState(false);
+
+  // 创建新画布
   const newCanvasEvent = useCallback(() => {
     setOpen(true);
   }, []);
@@ -77,12 +76,6 @@ export default memo(function Header() {
     []
   );
 
-  // useEffect(() => {
-  //   events.on("elementChange", elementChange);
-  //   return () => {
-  //     events.removeAllListeners("elementChange");
-  //   };
-  // }, []);
   useEffect(() => {
     mode.current = active;
   }, [active]);
@@ -92,7 +85,7 @@ export default memo(function Header() {
       <Modal
         okText="确定"
         cancelText="取消"
-        title="提示"
+        title="新建"
         open={open}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -123,18 +116,19 @@ export default memo(function Header() {
         <Button
           disabled={reg.test(active)}
           onClick={newCanvasEvent}
-          type="text"
+          type="link"
         >
           新建
         </Button>
-        <Button type="text">保存</Button>
+        <Button type="link">导入 JSON</Button>
       </div>
       <div className={`${style["header-center"]} ${style["header-item"]}`}>
         <Tooltip placement="bottom" title="撤销">
           <Button
             onClick={prevClickEvent}
-            type="text"
+            type="link"
             shape="circle"
+            style={{ marginRight: "15px" }}
             disabled={undoStack.length === 0}
             icon={<i className="iconfont i_pre"></i>}
           />
@@ -142,7 +136,7 @@ export default memo(function Header() {
         <Tooltip placement="bottom" title="重做">
           <Button
             onClick={nextClickEvent}
-            type="text"
+            type="link"
             shape="circle"
             disabled={redoStack.length === 0}
             icon={<i className="iconfont i_next"></i>}
@@ -150,7 +144,10 @@ export default memo(function Header() {
         </Tooltip>
       </div>
       <div className={`${style["header-right"]} ${style["header-item"]}`}>
-        <Button type="text">新建</Button>
+        <Button type="link">导出 PNG</Button>
+        <Button type="link">导出 JPG</Button>
+        <Button type="link">导出 SVG</Button>
+        <Button type="link">导出 JSON</Button>
       </div>
     </div>
   );
