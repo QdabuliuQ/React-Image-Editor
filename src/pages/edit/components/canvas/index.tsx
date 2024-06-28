@@ -7,6 +7,7 @@ import ButtonController from "@/components/buttonController";
 import ContextMenu from "@/components/contextMenu";
 import useCanvasHandle from "@/hooks/useCanvasHandle";
 import useElementContextMenu from "@/hooks/useElementContextMenu";
+import useOpeHistory from "@/hooks/useOpeHistory";
 import initAligningGuidelines from "@/libs/guidelines";
 import { updateActive } from "@/store/modules/active/action";
 import { addElement, deleteElementByIdx } from "@/store/modules/element/action";
@@ -21,8 +22,6 @@ import {
 } from "@/utils/element";
 import { exportFileToPng, exportFileToSvg } from "@/utils/exportFile";
 import initCanvas from "@/utils/initCanvas";
-// import { saveOperation } from "@/utils/opeHistory";
-import useOpeHistory from "@/hooks/useOpeHistory";
 import getRandomID from "@/utils/randomID";
 
 import style from "./index.module.less";

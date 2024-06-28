@@ -1,10 +1,10 @@
 @font-face {
   font-family: "iconfont"; /* Project id 4581064 */
-  src: url("//at.alicdn.com/t/c/font_4581064_rbkb1nl6xd.woff2?t=1719455730990")
+  src: url("//at.alicdn.com/t/c/font_4581064_bldykly9mjb.woff2?t=1719546405823")
       format("woff2"),
-    url("//at.alicdn.com/t/c/font_4581064_rbkb1nl6xd.woff?t=1719455730990")
+    url("//at.alicdn.com/t/c/font_4581064_bldykly9mjb.woff?t=1719546405823")
       format("woff"),
-    url("//at.alicdn.com/t/c/font_4581064_rbkb1nl6xd.ttf?t=1719455730990")
+    url("//at.alicdn.com/t/c/font_4581064_bldykly9mjb.ttf?t=1719546405823")
       format("truetype");
 }
 
@@ -16,20 +16,28 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.i_png:before {
+  content: "\e64e";
+}
+
+.i_jpg:before {
+  content: "\e652";
+}
+
+.i_json:before {
+  content: "\e654";
+}
+
+.i_svg:before {
+  content: "\e656";
+}
+
 .i_pre:before {
   content: "\e8e2";
 }
 
 .i_next:before {
   content: "\e97c";
-}
-
-.i_png:before {
-  content: "\e8fb";
-}
-
-.i_svg:before {
-  content: "\e8fd";
 }
 
 .i_delete:before {
