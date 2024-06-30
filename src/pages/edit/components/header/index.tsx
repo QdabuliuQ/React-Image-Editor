@@ -76,6 +76,16 @@ export default memo(function Header() {
     []
   );
 
+  const exportFile = (type: string) => {
+    return () => {
+      events.emit("exportFile", type);
+    };
+  };
+  const exportFileToPng = useCallback(exportFile("png"), []);
+  const exportFileToSvg = useCallback(exportFile("svg"), []);
+  const exportFileToJpg = useCallback(exportFile("jpg"), []);
+  const exportFileToJson = useCallback(exportFile("json"), []);
+
   useEffect(() => {
     mode.current = active;
   }, [active]);
@@ -144,10 +154,18 @@ export default memo(function Header() {
         </Tooltip>
       </div>
       <div className={`${style["header-right"]} ${style["header-item"]}`}>
-        <Button type="link">导出 PNG</Button>
-        <Button type="link">导出 JPG</Button>
-        <Button type="link">导出 SVG</Button>
-        <Button type="link">导出 JSON</Button>
+        <Button onClick={exportFileToPng} type="link">
+          导出 PNG
+        </Button>
+        <Button onClick={exportFileToJpg} type="link">
+          导出 JPG
+        </Button>
+        <Button onClick={exportFileToSvg} type="link">
+          导出 SVG
+        </Button>
+        <Button onClick={exportFileToJson} type="link">
+          导出 JSON
+        </Button>
       </div>
     </div>
   );

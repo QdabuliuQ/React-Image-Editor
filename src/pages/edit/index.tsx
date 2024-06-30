@@ -8,6 +8,7 @@ import Panel from "./components/panel";
 import style from "./index.module.less";
 
 export default memo(function Edit() {
+  // 初始化
   sessionStorage.setItem(
     "canvasInfo",
     JSON.stringify({
@@ -15,6 +16,8 @@ export default memo(function Edit() {
       height: 600,
     })
   );
+
+  sessionStorage.setItem("isOpe", "false");
 
   return (
     <div className={style["edit-page"]}>

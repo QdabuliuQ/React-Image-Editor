@@ -62,6 +62,10 @@ export default function useOpeHistory() {
         }
       });
     } else {
+
+      const elements = undoStack[undoStack.length - 1].objects.filter((item: { _data: any }) => item._data)
+      elements.unshift(window.sketch.toObject())
+      undoStack[undoStack.length - 1].objects = elements
       window._instance
         .loadFromJSON(undoStack[undoStack.length - 1])
         .renderAll();
@@ -84,10 +88,15 @@ export default function useOpeHistory() {
     updateElementMap()
   };
 
+  // 下一步操作
   const getNextOperation = () => {
     if (!redoStack.length || !window._instance) return;
     window.elementMap.clear()
     const json = redoStack[redoStack.length - 1];
+    // sketch 画布元素不需要参与撤回 这里替换为原来的画布元素
+    const elements = json.objects.filter((item: { _data: any }) => item._data)
+    elements.unshift(window.sketch.toObject())
+    json.objects = elements
     dispatch(popOperationRedoStack());
     if (undoStack.length === maxLength) {
       dispatch(shiftOperationUndoStack());

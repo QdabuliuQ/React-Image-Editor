@@ -20,7 +20,11 @@ import {
   createShapeElement,
   initElementProperty,
 } from "@/utils/element";
-import { exportFileToPng, exportFileToSvg } from "@/utils/exportFile";
+import {
+  exportFileJson,
+  exportFileToImage,
+  exportFileToSvg,
+} from "@/utils/exportFile";
 import initCanvas from "@/utils/initCanvas";
 import getRandomID from "@/utils/randomID";
 
@@ -30,12 +34,11 @@ let { width, height } = JSON.parse(
   sessionStorage.getItem("canvasInfo") as string
 );
 
-// const window.elementMap = new Map();
 window.elementMap = new Map();
+window.sketch = null;
 
 let canvasDom: HTMLCanvasElement;
-let sketch: any,
-  brushType = "";
+let brushType = "";
 function Canvas() {
   const { saveOperation } = useOpeHistory();
   const dispatch = useDispatch();
@@ -62,7 +65,7 @@ function Canvas() {
         height,
       }
     );
-    initCanvas(canvas.current, sketch, zoomLevel);
+    initCanvas(canvas.current, window.sketch, zoomLevel);
     setZoom(zoomLevel);
   }, []);
 
@@ -232,7 +235,7 @@ function Canvas() {
   // 画布更新
   const updateCanvasEvent = (data: { key: string; value: any }) => {
     const { key, value } = data;
-    sketch.set({
+    window.sketch.set({
       [key]: value,
     });
 
@@ -252,9 +255,11 @@ function Canvas() {
       }
     );
     if (key === "width" || key === "height") {
-      initCanvas(canvas.current, sketch, zoomLevel);
+      initCanvas(canvas.current, window.sketch, zoomLevel);
       setZoom(zoomLevel);
     } else {
+      console.log(key, value);
+
       canvas.current.renderAll();
     }
     scaleInitEvent();
@@ -280,7 +285,7 @@ function Canvas() {
       }
     );
     setZoom(zoomLevel);
-    initCanvas(canvas.current, sketch, zoomLevel);
+    initCanvas(canvas.current, window.sketch, zoomLevel);
   };
 
   // 切换笔刷模式
@@ -310,11 +315,13 @@ function Canvas() {
   };
 
   // 导出文件
-  const exportFileEvent = (type: string) => {
-    if (type === "png") {
-      exportFileToPng(canvas.current);
+  const exportFileEvent = (type: "png" | "svg" | "jpg" | "json") => {
+    if (type === "png" || type === "jpg") {
+      exportFileToImage(canvas.current, type);
     } else if (type === "svg") {
       exportFileToSvg(canvas.current);
+    } else if (type === "json") {
+      exportFileJson(canvas.current);
     }
   };
 
@@ -369,7 +376,7 @@ function Canvas() {
     )[0] as HTMLCanvasElement;
 
     // 画布元素
-    sketch = new fabric.Rect({
+    window.sketch = new fabric.Rect({
       fill: "#ffffff",
       left: 0,
       top: 0,
@@ -380,22 +387,9 @@ function Canvas() {
       hoverCursor: "default",
     });
 
-    canvas.current.add(sketch);
+    canvas.current.add(window.sketch);
 
     initScale();
-
-    // canvas.current.on("object:modified", () => {
-    //   saveOperation();
-    // });
-    // canvas.current.on("object:added", () => {
-    //   if (/.*Brush/.test(active)) return;
-    //   if (
-    //     sessionStorage.getItem("isOpe") === "false" ||
-    //     !sessionStorage.getItem("isOpe")
-    //   ) {
-    //     saveOperation();
-    //   }
-    // });
 
     // 画布缩放
     canvas.current.on("mouse:wheel", (opt: any) => {
@@ -548,6 +542,7 @@ function Canvas() {
           obj instanceof fabric.Path ||
           Object.prototype.hasOwnProperty.call(obj, "_objects")
       );
+      console.log(123);
 
       // 修改路径元素的 cornerStyle 属性为 'round'
       brushPaths.forEach((path: any) => {

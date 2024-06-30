@@ -16,12 +16,15 @@
       font-size: 20px;
       color: #000;
     }
+
     &:hover {
       background-color: #f1f1f1;
     }
+
     &:not(:last-child) {
       margin-right: 10px;
     }
+
     &:active {
       background-color: #dddddd;
     }
@@ -30,8 +33,16 @@
   .disable-button-item {
     background-color: #ededed;
     cursor: not-allowed;
+
     :global(.iconfont) {
       color: #b7b7b7;
+    }
+  }
+
+  .export-item {
+    :global(.iconfont) {
+      font-size: 18px;
+      color: #505050;
     }
   }
 }
