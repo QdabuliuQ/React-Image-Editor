@@ -32,6 +32,12 @@ export default memo(function ScaleController(props: Props) {
   const exportFileToPng = useCallback(() => {
     events.emit("exportFile", "png");
   }, []);
+  const exportFileToJpg = useCallback(() => {
+    events.emit("exportFile", "jpg");
+  }, []);
+  const exportFileToJson = useCallback(() => {
+    events.emit("exportFile", "json");
+  }, []);
 
   useEffect(() => {
     mode.current = active;
@@ -78,7 +84,7 @@ export default memo(function ScaleController(props: Props) {
       <Tooltip placement="top" title="导出 PNG">
         <div
           onClick={exportFileToPng}
-          className={`${style["button-item"]} ${
+          className={`${style["button-item"]} ${style["export-item"]} ${
             reg.test(active) ? style["disable-button-item"] : ""
           }`}
         >
@@ -87,8 +93,8 @@ export default memo(function ScaleController(props: Props) {
       </Tooltip>
       <Tooltip placement="top" title="导出 JPG">
         <div
-          onClick={exportFileToPng}
-          className={`${style["button-item"]} ${
+          onClick={exportFileToJpg}
+          className={`${style["button-item"]} ${style["export-item"]} ${
             reg.test(active) ? style["disable-button-item"] : ""
           }`}
         >
@@ -98,7 +104,7 @@ export default memo(function ScaleController(props: Props) {
       <Tooltip placement="top" title="导出 SVG">
         <div
           onClick={exportFileToSvg}
-          className={`${style["button-item"]} ${
+          className={`${style["button-item"]} ${style["export-item"]} ${
             reg.test(active) ? style["disable-button-item"] : ""
           }`}
         >
@@ -107,8 +113,8 @@ export default memo(function ScaleController(props: Props) {
       </Tooltip>
       <Tooltip placement="top" title="导出 JSON">
         <div
-          onClick={exportFileToSvg}
-          className={`${style["button-item"]} ${
+          onClick={exportFileToJson}
+          className={`${style["button-item"]} ${style["export-item"]} ${
             reg.test(active) ? style["disable-button-item"] : ""
           }`}
         >

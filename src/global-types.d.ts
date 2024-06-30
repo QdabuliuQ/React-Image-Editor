@@ -3,4 +3,5 @@ declare interface Window {
   redoStack: Array<any>;
   undoStack: Array<any>;
   elementMap: Map<string, any>
+  sketch: any
 }
