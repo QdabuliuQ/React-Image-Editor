@@ -1,8 +1,11 @@
 import { INIT_CANVAS, UPDATE_CANVAS } from "./constant";
-import { Canvas } from "@/types/canvas";
 import type { Action } from "@/types/reduxType";
 
-const initialValue: Canvas = {
+const initialValue: {
+  width: number
+  height: number
+  fill: string
+} = {
   width: 500,
   height: 600,
   fill: "#fff",
