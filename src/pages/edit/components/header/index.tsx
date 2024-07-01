@@ -122,7 +122,7 @@ export default memo(function Header() {
         </div>
         <p className={style["tip"]}>新建画布将会覆盖原画布的内容</p>
       </Modal>
-      <div className={`${style["header-left"]} ${style["header-item"]}`}>
+      <div className={`${style["header-item"]}`}>
         <Button
           disabled={reg.test(active)}
           onClick={newCanvasEvent}
@@ -130,7 +130,7 @@ export default memo(function Header() {
         >
           新建
         </Button>
-        <Button type="link">导入 JSON</Button>
+        {/* <Button type="link">导入 JSON</Button> */}
       </div>
       <div className={`${style["header-center"]} ${style["header-item"]}`}>
         <Tooltip placement="bottom" title="撤销">

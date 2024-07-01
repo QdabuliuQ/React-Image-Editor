@@ -34,6 +34,6 @@ export function popOperationUndoStack() {
 export function clearOperationUndoStack() {
   return {
     type: CLEAR_OPERATION_UNDOSTACK,
-    payload: null
-  }
+    payload: null,
+  };
 }

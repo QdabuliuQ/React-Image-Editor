@@ -6,6 +6,7 @@ import ContextMenuPosition from "@/components/contextMenuPosition";
 import ContextMenuZIndex from "@/components/contextMenuZIndex";
 import { updateActive } from "@/store/modules/active/action";
 import { addElement } from "@/store/modules/element/action";
+import { Canvas } from "@/types/canvas";
 import { initElementProperty } from "@/utils/element";
 import getRandomID from "@/utils/randomID";
 
@@ -34,6 +35,24 @@ export default function useElementContextMenu() {
     []
   );
 
+  const zindexClickEvent = useCallback((type: string) => {
+    const _type =
+      type === "top"
+        ? "bringToFront"
+        : type === "bottom"
+        ? "sendToBack"
+        : type === "one-top"
+        ? "bringForward"
+        : "sendBackwards";
+
+    events.emit("updateElementLayout", {
+      type: _type,
+      active: elementInfo.current!._data.id,
+    });
+
+    contextMenuRef.current?.hide();
+  }, []);
+
   const positionClickEvent = useCallback((type: string) => {
     if (!elementInfo.current) return;
     events.emit("updateElementPosition", {
@@ -50,7 +69,7 @@ export default function useElementContextMenu() {
 
   const contextMenuData = useMemo(
     () => [
-      <ContextMenuZIndex />,
+      <ContextMenuZIndex clickEvent={zindexClickEvent} />,
       {
         title: "复制",
         prefix: (
@@ -135,7 +154,7 @@ export default function useElementContextMenu() {
     events.emit("deleteElement", elementInfo.current._data.id);
   };
 
-  const menuClick = useCallback((title: string, canvas: any) => {
+  const menuClick = useCallback((title: string, canvas: Canvas) => {
     if (title === "复制") {
       copyEvent(canvas);
     } else if (title === "锁定") {
@@ -145,6 +164,8 @@ export default function useElementContextMenu() {
     } else if (title === "删除") {
       deleteEvent();
     }
+    console.log(title);
+
     (contextMenuRef.current as any).hide();
   }, []);
 

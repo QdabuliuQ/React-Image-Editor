@@ -5,6 +5,10 @@
   border-right: 1px solid #e7e7e7;
   box-sizing: border-box;
   overflow-y: auto;
+  .dragbox[dragging] {
+    background-color: #000;
+  }
+
   .disable-shape-path {
     stroke: #cacaca !important;
   }
@@ -54,12 +58,13 @@
       font-weight: bold;
       color: @color;
     }
-    :global(.ant-collapse-content-box) {
+    ant-collapse-header :global(.ant-collapse-content-box) {
       padding: 0 !important;
     }
     :global(.ant-collapse-header) {
       border-bottom: 1px solid #e9e9e9;
       box-sizing: border-box;
+      user-select: none;
     }
     .menu-shape-list {
       display: grid;
