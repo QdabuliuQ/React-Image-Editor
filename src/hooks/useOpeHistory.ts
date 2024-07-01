@@ -17,10 +17,10 @@ import { elementOptions, initElementProperty } from "@/utils/element";
 const maxLength = 30;
 
 function updateElementMap() {
-  window.elementMap.clear()
+  window.elementMap.clear();
   for (const item of window._instance.getObjects()) {
-    if (!item._data) continue
-    window.elementMap.set(item._data.id, item)
+    if (!item._data) continue;
+    window.elementMap.set(item._data.id, item);
   }
 }
 
@@ -38,12 +38,11 @@ export default function useOpeHistory() {
     }
     dispatch(pushOperationUndoStack(json));
 
-    updateElementMap()
+    updateElementMap();
   };
 
   // 上一步操作
   const getPrevOperation = () => {
-
     if (!undoStack.length || !window._instance) return;
 
     // 撤销栈弹出
@@ -62,10 +61,12 @@ export default function useOpeHistory() {
         }
       });
     } else {
-
-      const elements = undoStack[undoStack.length - 1].objects.filter((item: { _data: any }) => item._data)
-      elements.unshift(window.sketch.toObject())
-      undoStack[undoStack.length - 1].objects = elements
+      const elements = JSON.parse(
+        JSON.stringify(undoStack[undoStack.length - 1])
+      ).objects.filter((item: { _data: any }) => item._data);
+      window._instance.sendToBack(window.sketch);
+      elements.unshift(window.sketch.toObject());
+      undoStack[undoStack.length - 1].objects = elements;
       window._instance
         .loadFromJSON(undoStack[undoStack.length - 1])
         .renderAll();
@@ -85,18 +86,19 @@ export default function useOpeHistory() {
         }
       }
     }
-    updateElementMap()
+    updateElementMap();
   };
 
   // 下一步操作
   const getNextOperation = () => {
     if (!redoStack.length || !window._instance) return;
-    window.elementMap.clear()
+    window.elementMap.clear();
     const json = redoStack[redoStack.length - 1];
     // sketch 画布元素不需要参与撤回 这里替换为原来的画布元素
-    const elements = json.objects.filter((item: { _data: any }) => item._data)
-    elements.unshift(window.sketch.toObject())
-    json.objects = elements
+    const elements = json.objects.filter((item: { _data: any }) => item._data);
+    window._instance.sendToBack(window.sketch);
+    elements.unshift(window.sketch.toObject());
+    json.objects = elements;
     dispatch(popOperationRedoStack());
     if (undoStack.length === maxLength) {
       dispatch(shiftOperationUndoStack());
@@ -118,10 +120,10 @@ export default function useOpeHistory() {
         initElementProperty(item);
       }
     }
-    updateElementMap()
+    updateElementMap();
   };
 
-  useEffect(() => { }, [redoStack, undoStack])
+  useEffect(() => {}, [redoStack, undoStack]);
 
   return {
     saveOperation,

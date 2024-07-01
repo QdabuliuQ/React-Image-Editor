@@ -15,6 +15,7 @@ const undoStackReducer = (
   action: Action<ElementObj | null>
 ) => {
   const { type, payload } = action;
+
   if (type === PUSH_OPERATION_UNDOSTACK) {
     state.push(payload as ElementObj);
     return [...state];
@@ -25,7 +26,7 @@ const undoStackReducer = (
     state.pop();
     return [...state];
   } else if (type === CLEAR_OPERATION_UNDOSTACK) {
-    return []
+    return [];
   }
   return state;
 };

@@ -27,6 +27,8 @@ import {
 } from "@/utils/exportFile";
 import initCanvas from "@/utils/initCanvas";
 import getRandomID from "@/utils/randomID";
+import { initStaticCanvas } from "@/utils/ruler";
+import throttle from "@/utils/throttle";
 
 import style from "./index.module.less";
 
@@ -145,7 +147,8 @@ function Canvas() {
         [data.key]: data.value,
       });
       data.applyFilters && el.applyFilters();
-      canvas.current.renderAll();
+      canvas.current.requestRenderAll();
+      saveOperation();
     }
   };
 
@@ -153,6 +156,7 @@ function Canvas() {
   const updateElementLayoutEvent = (data: { type: string; active: string }) => {
     if (window.elementMap.has(data.active)) {
       canvas.current[data.type](window.elementMap.get(data.active));
+      canvas.current.sendToBack(window.sketch);
     }
   };
 
@@ -165,6 +169,9 @@ function Canvas() {
     canvas.current.setWidth(width);
     canvas.current.setHeight(height);
 
+    window._static_instance.setWidth(width);
+    window._static_instance.setHeight(height);
+    initStaticCanvas(width, height);
     scaleInitEvent();
   };
 
@@ -369,7 +376,15 @@ function Canvas() {
       transparentCorners: false,
       allowTouchScrolling: true,
     });
-    (window as any)._instance = canvas.current;
+    window._instance = canvas.current;
+    window._static_instance = new fabric.StaticCanvas("staticCanvas", {
+      selection: false, // 画布不显示选中
+      fireRightClick: true, //右键点击事件生效
+      stopContextMenu: true, //右键点击禁用默认自带的目录
+      fireMiddleClick: true, //中间建点击事件生效
+      transparentCorners: false,
+      allowTouchScrolling: true,
+    });
 
     canvasDom = document.getElementsByClassName(
       "upper-canvas"
@@ -475,11 +490,37 @@ function Canvas() {
       // 转换后的坐标，restorePointerVpt 不受视窗变换的影响
       const pointerVpt = canvas.current.restorePointerVpt(point);
       const dargInfo = JSON.parse(sessionStorage.getItem("dragInfo") as string);
+
       createElementEvent(dargInfo.type, dargInfo.options, {
         top: pointerVpt.y,
         left: pointerVpt.x,
       });
-      sessionStorage.removeItem("dragItem");
+      sessionStorage.removeItem("dragInfo");
+    });
+
+    // 添加节流函数
+    const _staticCanvasRenderAll = window._static_instance.renderAll;
+    window._static_instance.renderAll = throttle(_staticCanvasRenderAll, 16);
+    // 添加鼠标移动
+    window._instance.on("mouse:move", function ({ e }: any) {
+      if (
+        !window.horizontalLine ||
+        !window.verticalLine ||
+        !window._static_instance
+      )
+        return;
+      const { layerX, layerY } = e;
+      window.horizontalLine.set({
+        top: layerY + 20,
+      });
+
+      window.verticalLine.set({
+        left: layerX + 20,
+      });
+
+      window._static_instance.renderAll();
+
+      // moveHorizontally(e, width);
     });
 
     // 添加参考线
@@ -524,11 +565,15 @@ function Canvas() {
       canvas.current.clear();
       canvas.current.dispose();
       canvas.current = null;
+
+      window._static_instance = null;
+      window._instance = null;
     };
   }, []);
 
   useEffect(() => {
     if (!canvas.current) return;
+
     canvas.current.on("object:modified", () => {
       saveOperation();
     });
@@ -542,7 +587,6 @@ function Canvas() {
           obj instanceof fabric.Path ||
           Object.prototype.hasOwnProperty.call(obj, "_objects")
       );
-      console.log(123);
 
       // 修改路径元素的 cornerStyle 属性为 'round'
       brushPaths.forEach((path: any) => {
@@ -587,7 +631,26 @@ function Canvas() {
   return (
     <div id="canvas-component" className={style["canvas-component"]}>
       <div className={style["canvas-main"]}>
-        <canvas id="c"></canvas>
+        <canvas
+          style={{
+            position: "relative",
+            zIndex: 2,
+          }}
+          id="c"
+        ></canvas>
+        <canvas
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            width: "100%",
+            height: "100%",
+            zIndex: 1,
+          }}
+          width="100"
+          height="100"
+          id="staticCanvas"
+        ></canvas>
       </div>
       <div className={style["canvas-info"]}>
         <ButtonController
